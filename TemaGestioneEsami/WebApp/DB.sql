@@ -10,7 +10,7 @@ CREATE TABLE Teachers (
  Password VARCHAR(30) NOT NULL,
  Nome VARCHAR(30) NOT NULL,
  Cognome VARCHAR(30) NOT NULL,
- Telefono VARCHAR(30) NOT NULL,
+ Telefono VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE Students (
@@ -20,10 +20,19 @@ CREATE TABLE Students (
  Nome VARCHAR(30) NOT NULL,
  Cognome VARCHAR(30) NOT NULL,
  Telefono INT NOT NULL,
- IdExam INT NOT NULL,
- FOREIGN KEY (IdExam) REFERENCES Exams(IdExam) --mettiamo una molti a molti
+ IdExam INT NOT NULL
+
 );
 
+CREATE TABLE IsEnrolled(
+    IdStudent INTEGER,
+    IdExam INTEGER,
+    PRIMARY KEY (IdStudent,IdExam),
+    DataRegistrazioneVoto TIMESTAMP,--stessa cosa qui ma può essere
+    DataScadenzaVoto TIMESTAMP, --può essere null perchè sostanzialmente se non si passa l'esame, questo campo non ha valore
+    FOREIGN KEY (IdStudent) REFERENCES Students(IdStudent),
+    FOREIGN KEY (IdExam) REFERENCES Exams(IdExam)
+);
 
 CREATE TABLE Exams (
  IdExam SERIAL PRIMARY KEY ,
@@ -40,31 +49,34 @@ CREATE TYPE modalita AS ENUM ('Esame', 'Idoneità', 'Bonus');
 CREATE TABLE Tests (
     IdTest SERIAL PRIMARY KEY,
     NomeTest VARCHAR(30) NOT NULL,
-    Tipologia VARCHAR(30) NOT NULL, -- può essere qualsiasi cosa?
-    TipoValutazione modalita NOT NULL,--verificare inserimento della valutazione
+    Tipologia VARCHAR(30) NOT NULL, -- può essere qualsiasi cosa? si
+    TipoValutazione modalita NOT NULL,-- verificare inserimento della valutazione
     IdResponsabile INT NOT NULL,
     IdExam INT NOT NULL,
     FOREIGN KEY (IdResponsabile) REFERENCES Teachers(IdTeacher)
+    --CHECK (modalita!='Esame' OR modalita!='Idoneità' OR modalita !='Bonus')-- controllo se la modalità è corretta
+
 
 );
 
 
 CREATE TABLE ExamAppeals(
   IdAppeal SERIAL PRIMARY KEY,
-  Data TIMESTAMP NOT NULL,
+  DataEsame TIMESTAMP NOT NULL,
   IdTest INT NOT NULL,
   FOREIGN KEY (IdTest) REFERENCES Tests(IdTest) ON DELETE CASCADE
 );
 
 
 CREATE TABLE Sustains(
-    IdStudent PRIMARY KEY,
-    IdAppeal PRIMARY KEY,
+    IdStudent INTEGER,
+    IdAppeal INTEGER,
     Valutazione FLOAT NOT NULL CHECK (Valutazione > 0 AND Valutazione < 32), --check sul tipo di valutazione
     Idoneo BOOLEAN DEFAULT FALSE NOT NULL, -- da togliere
     isBonus BOOLEAN DEFAULT FALSE NOT NULL, -- da togliere
+    PRIMARY KEY(IdStudent,IdAppeal),
     FOREIGN KEY (IdStudent) REFERENCES Students(IdStudent) ON DELETE CASCADE,
-    FOREIGN KEY (IdAppeal) REFERENCES ExamAppeals(IdAppeal) ON DELETE CASCADE,
+    FOREIGN KEY (IdAppeal) REFERENCES ExamAppeals(IdAppeal) ON DELETE CASCADE
 
     --controllare quali campi sono necessari
 
@@ -80,7 +92,7 @@ CREATE TABLE Sustains(
 
 
 
-
+/**
 
 
 CREATE TABLE Corsi (
@@ -349,3 +361,4 @@ CREATE TRIGGER cambioLimiteIscritti
 BEFORE UPDATE OF LimiteStudenti ON Corsi
 FOR EACH ROW
 EXECUTE FUNCTION cambioLimiteIscritti();
+ */
