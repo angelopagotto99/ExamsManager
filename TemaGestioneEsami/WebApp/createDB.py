@@ -76,7 +76,7 @@ class Tests(Base):
     IdTest = Column(Integer, primary_key=True)
     NomeTest = Column(String(30), nullable=False)
     Tipologia = Column(String(30), nullable=False)
-    TipoValutazione = Column(Enum('Esame', 'Idoneità', 'Bonus'), nullable=False)
+    TipoValutazione = Column(Enum('Esame', 'Idoneità', 'Bonus', name='modalità'), nullable=False)
     IdResponsabile = Column(Integer, ForeignKey('Teachers.IdTeacher'))
     IdExam = Column(Integer, ForeignKey('Exams.IdExam'))
 
