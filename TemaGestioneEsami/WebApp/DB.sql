@@ -29,7 +29,7 @@ CREATE TABLE IsEnrolled(
     IdExam INTEGER,
     PRIMARY KEY (IdStudent,IdExam),
     DataRegistrazioneVoto TIMESTAMP,--stessa cosa qui ma può essere
-    DataScadenzaVoto TIMESTAMP, --può essere null perchè sostanzialmente se non si passa l'esame, questo campo non ha valore
+    status BOOLEAN,
     FOREIGN KEY (IdStudent) REFERENCES Students(IdStudent),
     FOREIGN KEY (IdExam) REFERENCES Exams(IdExam)
 );
