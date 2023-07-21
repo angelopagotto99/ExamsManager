@@ -15,6 +15,7 @@ from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 
+
 app = Flask(__name__)
 
 login_manager = LoginManager()
@@ -153,26 +154,32 @@ def newStudent():
     surnameForm = request.form["surname"]
     emailForm = request.form["email"]
     telephoneForm = request.form["telephone"]
-    schoolNameForm = request.form["schoolName"]
+    facultyForm = request.form["faculty"]
+    matricolaForm = request.form["matricola"]
     pwdForm = request.form["pwd"]
     checkPwdForm = request.form["pwd2"]
 
     if request.method == 'POST':
         existStudent = session.query(Students.Id).filter(Students.Email == emailForm).first()  # ottiene un l'id di un utente che ha l'email uguale a quella passata
         if existStudent is None:  # verifica se non esiste alcuno studente registrato con la email emailForm
-            if pwdForm == checkPwdForm:  # controllo se la password e la conferma sono uguali
-                # Crea lo studente
-                newStudent = Students(Name=nameForm, Surname=surnameForm, Email=emailForm, Telephone=telephoneForm, SchoolName=schoolNameForm,
-                                      Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8'))  # generate_password_hash(pwdForm): genera un hash della password utilizzando bcrypt
-                session.add(newStudent)  # aggiunge lo studente al database
-                session.commit()  # conferma le modifiche
-                return redirect('/')
+            if facultyForm == 'Informatica' or facultyForm == 'Scienze ambientali' or facultyForm == 'Umanistica':  # controllo se la facoltà inserita è corretta
+
+                if pwdForm == checkPwdForm:  # controllo se la password e la conferma sono uguali
+                    # Crea lo studente
+                    newStudent = Students(Name=nameForm, Matricola=matricolaForm, Surname=surnameForm, Email=emailForm, Telephone=telephoneForm, Faculty=facultyForm,
+                                          Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8'))  # generate_password_hash(pwdForm): genera un hash della password utilizzando bcrypt
+                    session.add(newStudent)  # aggiunge lo studente al database
+                    session.commit()  # conferma le modifiche
+                    return redirect('/')
+                else:
+                    return render_template('studentRegistration.html', error="pwd", name=nameForm, surname=surnameForm,
+                                           telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
             else:
-                return render_template('studentRegistration.html', error="pwd", name=nameForm, surname=surnameForm,
-                                       telephone=telephoneForm, schoolName=schoolNameForm, email=emailForm, pwd1=pwdForm)
+                return render_template('studentRegistration.html',error="faculty",name=nameForm, surname=surnameForm,
+                                           telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
         else:
             return render_template('studentRegistration.html', error="email", name=nameForm, surname=surnameForm,
-                                   telephone=telephoneForm, schoolName=schoolNameForm, email=emailForm, pwd1=pwdForm,
+                                   telephone=telephoneForm, email=emailForm, pwd1=pwdForm,
                                    pwd2=checkPwdForm)
     else:
         return redirect('/registration/newStudent')
@@ -187,46 +194,33 @@ def newTeacher():
     surnameForm = request.form["surname"]
     emailForm = request.form["email"]
     telephoneForm = request.form["telephone"]
-    matricolaForm = request.form["matricola"]
+    facultyForm = request.form["faculty"]
     pwdForm = request.form["pwd"]
     checkPwdForm = request.form["pwd2"]
 
     if request.method == 'POST':
-
-        # controlli su matricola
-        if len(matricolaForm) == 6:
-            # matricola è composta da 6 caratteri
-            usedMatricola = session.query(Teachers.Id).filter(Teachers.Matricola == matricolaForm).first()
-            if usedMatricola is None:  # controlla se matricolaForm è usata da qualche docente
-                # matricolaForm non è usata da nessun docente
-                if emailForm[:6] == matricolaForm:
-                    # i primi 6 caratteri della email corrispondono alla matricola
-                    existTeacher = session.query(Teachers.Id).filter(Teachers.Email == emailForm).first()  # ottiene un l'id di un docente che ha l'email uguale a quella passata
-                    if existTeacher is None:  # verifica se non esiste nessun docente con la mail usata per registrarsi
-
+            usedEmail = session.query(Teachers.Id).filter(Teachers.Email == emailForm).first()
+            if usedEmail is None:  # controlla se emailForm è usata da qualche docente
+                    #existTeacher = session.query(Teachers.Id).filter(Teachers.Email == emailForm).first()  # ottiene un l'id di un docente che ha l'email uguale a quella passata
+                    #if existTeacher is None:  # verifica se non esiste nessun docente con la mail usata per registrarsi
+                    if facultyForm=='Informatica' or facultyForm=='Scienze ambientali' or facultyForm=='Umanistica': #controllo se la facoltà inserita è corretta
                         if pwdForm == checkPwdForm: # controllo se la password e la conferma sono uguali
                             # Crea il docente
-                            newTeacher = Teachers(Name=nameForm, Surname=surnameForm, Email=emailForm,
-                                                  Telephone=telephoneForm, Matricola=matricolaForm,
+                            newTeacher = Teachers(Name=nameForm, Surname=surnameForm, Email=emailForm, Faculty=facultyForm,
+                                                  Telephone=telephoneForm,
                                                   Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8'))  # generate_password_hash(pwdForm): genera un hash della password utilizzando bcrypt
                             session.add(newTeacher) # aggiunge il docente al database
                             session.commit() # conferma le modifiche
                             return redirect('/')
                         else:
-                            return render_template('teacherRegistration.html', error="pwd", name=nameForm, surname=surnameForm,
-                                                   telephone=telephoneForm, matricola=matricolaForm, email=emailForm, pwd1=pwdForm)
+                            return render_template('teacherRegistration.html', error="pwd", name=nameForm, surname=surnameForm, faculty=facultyForm,
+                                                   telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
                     else:
-                        return render_template('teacherRegistration.html', error="email", name=nameForm, surname=surnameForm,
-                                               telephone=telephoneForm, matricola=matricolaForm, email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
-                else:
-                    return render_template('teacherRegistration.html', error="email_matricola", name=nameForm, surname=surnameForm,
-                                           telephone=telephoneForm, matricola=matricolaForm, pwd1=pwdForm, pwd2=checkPwdForm)
+                        return render_template('teacherRegistration.html', error="faculty", name=nameForm, surname=surnameForm,telephone=telephoneForm, faculty=facultyForm, email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
             else:
-                return render_template('teacherRegistration.html', error="matricola", name=nameForm, surname=surnameForm,
-                                       telephone=telephoneForm, email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
-        else:
-            return render_template('teacherRegistration.html', error="matricola", name=nameForm, surname=surnameForm,
-                                   telephone=telephoneForm, email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
+                return render_template('teacherRegistration.html', error="email", name=nameForm, surname=surnameForm,
+                                       telephone=telephoneForm, faculty=facultyForm ,email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
+
     else:
         return redirect('/registration/newTeacher')
 

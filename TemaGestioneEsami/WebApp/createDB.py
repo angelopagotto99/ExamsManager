@@ -11,12 +11,14 @@ class Teachers(Base):
 
     #dichiarazione dei campi della tabella
 
-    IdTeacher = Column(Integer, primary_key=True)
+    Id = Column(Integer, primary_key=True)
     Email = Column(String(30), nullable=False, unique=True)
-    Password = Column(String(30), nullable=False)
-    Nome = Column(String(30), nullable=False)
-    Cognome = Column(String(30), nullable=False)
-    Telefono = Column(String(30), nullable=False)
+    Pwd = Column(String, nullable=False)
+    Name = Column(String(30), nullable=False)
+    Surname = Column(String(30), nullable=False)
+    Telephone = Column(String(30), nullable=False)
+    Faculty = Column(String(30), nullable=False)
+
     #relazione con esami 1 a n
     Exams = relationship('Exams', back_populates='Teacher')
     #relazione con prove 1 a 1
@@ -27,13 +29,15 @@ class Students(Base):
 
     #dichiarazione dei campi della tabella
 
-    IdStudent = Column(Integer, primary_key=True)
-    Email = Column(String(30), nullable=False, unique=True)
-    Password = Column(String(30), nullable=False)
-    Nome = Column(String(30), nullable=False)
-    Cognome = Column(String(30), nullable=False)
-    Telefono = Column(Integer, nullable=False)
-    IdExam = Column(Integer, nullable=False)
+    Id = Column(Integer, primary_key=True)
+    Email = Column(String, nullable=False, unique=True)
+    Matricola = Column(String(6), nullable=False, unique=True)
+    Pwd = Column(String, nullable=False)
+    Name = Column(String(30), nullable=False)
+    Surname = Column(String(30), nullable=False)
+    Telephone = Column(Integer, nullable=False)
+    Faculty = Column(String(30), nullable=False)
+
     #relazione con prove n a m
     Tests = relationship('Tests', secondary='Sustains')
     #relazione con esami n a m
@@ -44,7 +48,7 @@ class IsEnrolled(Base):
 
     #dichiarazione dei campi della tabella
 
-    IdStudent = Column(Integer, ForeignKey('Students.IdStudent'), primary_key=True)
+    IdStudent = Column(Integer, ForeignKey('Students.Id'), primary_key=True)
     IdExam = Column(Integer, ForeignKey('Exams.IdExam'), primary_key=True)
     DataRegistrazioneVoto = Column(DateTime)
     DataScadenzaVoto = Column(DateTime)
@@ -59,10 +63,12 @@ class Exams(Base):
     #dichiarazione dei campi della tabella
 
     IdExam = Column(Integer, primary_key=True)
-    NomeExam = Column(String(30), nullable=False)
-    Descrizione = Column(String(100))
-    nProve = Column(Integer, nullable=False)
-    IdTeacher = Column(Integer, ForeignKey('Teachers.IdTeacher'))
+    ExamName = Column(String(30), nullable=False)
+    Description = Column(String(100), nullable=False)
+    nTest = Column(Integer, nullable=False)
+    IdTeacher = Column(Integer, ForeignKey('Teachers.Id'))
+    Faculty = Column(String(30), nullable=False)
+    CFU = Column(Integer, nullable=False)
 
     Teacher = relationship('Teachers', back_populates='Exams')
     Tests = relationship('Tests', back_populates='Exam')
@@ -74,10 +80,10 @@ class Tests(Base):
     #dichiarazione dei campi della tabella
 
     IdTest = Column(Integer, primary_key=True)
-    NomeTest = Column(String(30), nullable=False)
-    Tipologia = Column(String(30), nullable=False)
-    TipoValutazione = Column(Enum('Esame', 'Idoneità', 'Bonus', name='modalità'), nullable=False)
-    IdResponsabile = Column(Integer, ForeignKey('Teachers.IdTeacher'))
+    TestName = Column(String(30), nullable=False)
+    Tipology = Column(String(30), nullable=False)
+    ValType = Column(Enum('Esame', 'Idoneità', 'Bonus', name='modalità'), nullable=False)
+    IdResponsabile = Column(Integer, ForeignKey('Teachers.Id'))
     IdExam = Column(Integer, ForeignKey('Exams.IdExam'))
 
     #relazione con docenti 1 a 1
@@ -93,7 +99,7 @@ class ExamAppeals(Base):
     #dichiarazione dei campi della tabella
 
     IdAppeal = Column(Integer, primary_key=True)
-    DataEsame = Column(DateTime, nullable=False)
+    ExamData = Column(DateTime, nullable=False)
     IdTest = Column(Integer, ForeignKey('Tests.IdTest'))
     #relazione con test 1 a n
     Test = relationship('Tests', back_populates='Appeals')
@@ -103,9 +109,9 @@ class Sustains(Base):
 
     #dichiarazione dei campi della tabella
 
-    IdStudent = Column(Integer, ForeignKey('Students.IdStudent'), primary_key=True)
+    IdStudent = Column(Integer, ForeignKey('Students.Id'), primary_key=True)
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.IdAppeal'), primary_key=True)
-    Valutazione = Column(Float, nullable=False)
+    Valutation = Column(Float, nullable=False)
     Idoneo = Column(Boolean, nullable=False, default=False)
     isBonus = Column(Boolean, nullable=False, default=False)
 

@@ -26,19 +26,42 @@
 
 
     <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
 
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
+    .bg {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: 300% 300%;
+      background-image: linear-gradient(-45deg, yellow 0%, #d3d338 25%, #a0a02d 51%, #ff357f 100%);
+      -webkit-animation: AnimateBG 20s ease infinite;
+      animation: AnimateBG 20s ease infinite;
+    }
+
+    @-webkit-keyframes AnimateBG {
+      0% {
+        background-position: 0% 50%;
       }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes AnimateBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
     </style>
 
 
@@ -47,7 +70,7 @@
   </head>
 
 
-  <body>
+  <body class="bg">
     <div class="container py-3">
 
       <header>
@@ -92,45 +115,42 @@
             </div>
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Matricola <span class="text-danger">*</span></label>
-              {% if error is not defined %}
-                  <input name="matricola" type="text" class="form-control" required>
-              {% elif error is defined and error=="matricola" %}
-                  <input name="matricola" type="text" class="form-control" required>
-                  <div id="emailHelp" class="form-text text-danger">La matricola è già usata o è più lunga di 6 caratteri.</div>
+              <label for="exampleInputEmail1" class="form-label">Email address <span class="text-danger">*</span></label>
+              {% if error is defined and error=="email" %}
+                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
+                <div id="emailHelp2" class="form-text text-danger">Indirizzo Email già usato. Inserire Email diversa.</div>
+              {% elif error is defined and error=="email_matricola" %}
+                <input name="email" type="email" class="form-control" id="exampleInputEmail5" aria-describedby="emailHelp" value="{{ email }}" required>
+                <div id="emailHelp3" class="form-text text-danger">I primi 6 caratteri della email devono essere uguali alla matricola</div>
+              {% elif error is defined and error=="pwd" %}
+                <input name="email" type="email" class="form-control" id="exampleInputEmail4" aria-describedby="emailHelp" value="{{ email }}" required>
               {% else %}
-                <input name="matricola" type="text" class="form-control" required value="{{ matricola }}">
+                <input name="email" type="email" class="form-control" id="exampleInputEmail3" aria-describedby="emailHelp" placeholder="matricola@unive.it" required>
               {% endif %}
             </div>
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Email address <span class="text-danger">*</span></label>
-              {% if error is defined and error=="email" %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
-                <div id="emailHelp" class="form-text text-danger">Indirizzo Email già usato. Inserire Email diversa.</div>
-              {% elif error is defined and error=="email_matricola" %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
-                <div id="emailHelp" class="form-text text-danger">I primi 6 caratteri della email devono essere uguali alla matricola</div>
-              {% elif error is defined and error=="pwd" %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
+              <label for="exampleInputEmail1" class="form-label">Faculty <span class="text-danger">*</span></label>
+              {% if error is defined and error=="faculty" %}
+                <input name="faculty" type="text" class="form-control" id="exampleInputEmail13" required value="{{ faculty }}">
               {% else %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="matricola@unive.it" required>
+                <input name="faculty" type="text" class="form-control" id="exampleInputEmail14" required>
               {% endif %}
             </div>
 
             <div class="mb-3">
               <label for="exampleInputPassword1" class="form-label">Password <span class="text-danger">*</span></label>
               {% if error is defined and error=="pwd" %}
-                <input name="pwd" type="password" class="form-control" id="exampleInputPassword1" required value="{{ pwd1 }}">
+                <input name="pwd" type="password" class="form-control" id="exampleInputPassword" required value="{{ pwd1 }}">
               {% else %}
-                <input name="pwd" type="password" class="form-control" id="exampleInputPassword1" required>
+                <input name="pwd" type="password" class="form-control" id="exampleInputPassword2" required>
               {% endif %}
             </div>
 
             <div class="mb-3">
               <label for="exampleInputPassword1" class="form-label">Conferma password <span class="text-danger">*</span></label>
               {% if error is defined and error=="pwd" %}
-                <input name="pwd2" type="password" class="form-control" id="exampleInputPassword1" required>
+                <input name="pwd2" type="password" class="form-control" id="exampleInputPassword8" required>
                 <div id="emailHelp" class="form-text text-danger">Password di conferma non valida.</div>
               {% else %}
                 <input name="pwd2" type="password" class="form-control" id="exampleInputPassword1" required>

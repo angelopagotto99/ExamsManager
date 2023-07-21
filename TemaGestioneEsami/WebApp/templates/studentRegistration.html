@@ -26,19 +26,42 @@
 
 
     <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
 
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
+    .bg {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: 300% 300%;
+      background-image: linear-gradient(-45deg, yellow 0%, #d3d338 25%, #a0a02d 51%, #ff357f 100%);
+      -webkit-animation: AnimateBG 20s ease infinite;
+      animation: AnimateBG 20s ease infinite;
+    }
+
+    @-webkit-keyframes AnimateBG {
+      0% {
+        background-position: 0% 50%;
       }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes AnimateBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
     </style>
 
 
@@ -47,7 +70,8 @@
   </head>
 
 
-  <body>
+  <body class="bg">
+
     <div class="container py-3">
 
       <header>
@@ -83,6 +107,17 @@
             </div>
 
             <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Matricola <span class="text-danger">*</span></label>
+              {% if error is not defined %}
+                <input name="matricola" type="text" class="form-control" required pattern="[0-9]{6}" title="La matricola deve essere composta da 6 cifre">
+              {% else %}
+                <input name="matricola" type="text" class="form-control" required value="{{ matricola }}" pattern="[0-9]{6}" title="La matricola deve essere composta da 6 cifre">
+              {% endif %}
+              <div class="invalid-feedback">La matricola è già utilizzata.</div>
+            </div>
+
+
+            <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">Telephone <span class="text-danger">*</span></label>
               {% if error is not defined %}
                 <input name="telephone" type="text" class="form-control" required>
@@ -92,34 +127,35 @@
             </div>
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">SchoolName <span class="text-danger">*</span></label>
-              {% if error is not defined %}
-                <input name="schoolName" type="text" class="form-control" required>
+              <label for="exampleInputEmail1" class="form-label">Email address <span class="text-danger">*</span></label>
+              {% if error is defined and error=="email" %}
+                <input name="email" type="email" class="form-control" id="exampleInputEmail2" aria-describedby="emailHelp" value="{{ email }}" required>
+                <div id="emailHelp1" class="form-text text-danger">Indirizzo Email già usato. Inserire Email diversa.</div>
+              {% elif error is defined and error=="pwd" %}
+                <input name="email" type="email" class="form-control" id="exampleInputEmail3" aria-describedby="emailHelp" value="{{ email }}" required>
               {% else %}
-                <input name="schoolName" type="text" class="form-control" required value="{{ schoolName }}">
+                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="matricola@stud.unive.it" required>
               {% endif %}
             </div>
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Email address <span class="text-danger">*</span></label>
-              {% if error is defined and error=="email" %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
-                <div id="emailHelp" class="form-text text-danger">Indirizzo Email già usato. Inserire Email diversa.</div>
-              {% elif error is defined and error=="pwd" %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ email }}" required>
+              <label for="exampleInputEmail1" class="form-label">Faculty <span class="text-danger">*</span></label>
+              {% if error is defined and error=="faculty" %}
+                <input name="faculty" type="text" class="form-control" id="exampleInputEmail11" required value="{{ faculty }}">
               {% else %}
-                <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="name@example.com" required>
+                <input name="faculty" type="text" class="form-control" id="exampleInputEmail12" required>
               {% endif %}
             </div>
 
             <div class="mb-3">
               <label for="exampleInputPassword1" class="form-label">Password <span class="text-danger">*</span></label>
               {% if error is defined and error=="pwd" %}
-                <input name="pwd" type="password" class="form-control" id="exampleInputPassword1" required value="{{ pwd1 }}">
+                <input name="pwd" type="password" class="form-control" id="exampleInputPassword" required value="{{ pwd1 }}">
               {% else %}
-                <input name="pwd" type="password" class="form-control" id="exampleInputPassword1" required>
+                <input name="pwd" type="password" class="form-control" id="exampleInputPassword2" required>
               {% endif %}
             </div>
+
 
             <div class="mb-3">
               <label for="exampleInputPassword1" class="form-label">Conferma password <span class="text-danger">*</span></label>
@@ -127,7 +163,7 @@
                 <input name="pwd2" type="password" class="form-control" id="exampleInputPassword1" required>
                 <div id="emailHelp" class="form-text text-danger">Password di conferma non valida.</div>
               {% else %}
-                <input name="pwd2" type="password" class="form-control" id="exampleInputPassword1" required>
+                <input name="pwd2" type="password" class="form-control" id="exampleInputPassword3" required>
               {% endif %}
             </div>
 
@@ -141,6 +177,41 @@
         </main>
       </div>
     </div>
+  </div>
   </body>
   <script src="/docs/5.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const matricolaInput = document.querySelector('input[name="matricola"]');
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (event) {
+      const matricola = matricolaInput.value.trim();
+      if (matricola.length !== 6 || !/^\d+$/.test(matricola)) {
+        alert("La matricola deve essere composta da 6 cifre.");
+        event.preventDefault();
+        return;
+      }
+
+      // Effettua una richiesta al server per verificare se la matricola è già utilizzata.
+      fetch("http://127.0.0.1/matricola=" + matricola)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.exists) {
+            const invalidFeedback = matricolaInput.nextElementSibling;
+            invalidFeedback.style.display = "block"; // Mostra il messaggio di errore
+            event.preventDefault();
+          } else {
+            const invalidFeedback = matricolaInput.nextElementSibling;
+            invalidFeedback.style.display = "none"; // Nascondi il messaggio di errore, nel caso fosse già stato mostrato precedentemente
+            // Se la matricola è valida e non esiste già, puoi procedere con l'invio del modulo.
+            // form.submit();
+          }
+        })
+        .catch((error) => {
+          console.error("Errore nella richiesta al server: ", error);
+        });
+    });
+  });
+</script>
+
 </html>
