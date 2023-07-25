@@ -5,6 +5,7 @@
 # Questa pagina si occupa di:
 # 	1. Mantenere la connessione con le altre pagine tramite la parte di blueprint di flask
 # 	2. Gestire il login e la registrazione.
+
 import bcrypt
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -15,6 +16,7 @@ from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 
+from teacherExam import app_teacherExam
 
 app = Flask(__name__)
 
@@ -28,6 +30,7 @@ engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exa
 bcrypt = Bcrypt(app)
 app.config['SECRET_KEY'] = 'ubersecret'
 
+app.register_blueprint(app_teacherExam)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)
@@ -183,6 +186,7 @@ def newStudent():
                                    pwd2=checkPwdForm)
     else:
         return redirect('/registration/newStudent')
+
 
 
 # Crea un nuovo docente e lo aggiunge al database ottenendo le informazioni dalla pagina teacherRegistration.html.
