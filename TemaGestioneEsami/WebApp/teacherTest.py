@@ -125,8 +125,9 @@ def updateCurrentTest():
     if current_user.is_authenticated:
 
         IdExamForm = int(request.form["IdExam"])
-        tests = session.query(Tests).filter(Tests.Id == IdExamForm).first()
-        return render_template('teacherUpdateTests.html', myTest=tests, IdExam=IdExamForm)
+        IdTestForm = int(request.form["IdTest"])
+        tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).first()
+        return render_template('teacherUpdateTests.html', myTest=tests, IdExam=IdExamForm, IdTest=IdTestForm)
     else:
         return redirect('/')
 
@@ -136,16 +137,18 @@ def ReUpdateCurrentTest():
 
     if current_user.is_authenticated:
 
-        IdExamForm = request.args.get("IdExam", type=int)
+        IdTestForm = int(request.form["IdTest"])
+        IdExamForm = int(request.form["IdExam"])
+
         NameForm = request.form["name"]
         TipoForm = request.form["type"]
         ValForm = request.form["value"]
-        session.query(Tests).filter(and_(Tests.Id == IdExamForm)).update({Tests.TestName: NameForm , Tests.Tipology: TipoForm, Tests.ValType: ValForm})
+        session.query(Tests).filter(and_(Tests.Id==IdTestForm,Tests.IdExam==IdExamForm)).update({Tests.TestName: NameForm , Tests.Tipology: TipoForm, Tests.ValType: ValForm})
         session.commit()
         return render_template('teacherArea.html')
     else:
         return redirect('/')
-'''
+
 @app_teacherTest.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
 @login_required
 def enrolledStudents():
@@ -175,7 +178,7 @@ def showTeacherTests():
         return render_template('teacherShowMyTests.html', test=tests, exam=testInfo)
     else:
         return redirect('/')
-'''
+
 
 @app_teacherTest.route('/registrationTest', methods=['GET', 'POST'])
 def registrationTest():

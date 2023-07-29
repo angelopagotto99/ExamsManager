@@ -85,8 +85,8 @@
 
           <form action='/ReUpdateCurrentTest'  method="POST">
 
+              <input type="hidden" name="IdTest" value="{{ IdTest }}">
               <input type="hidden" name="IdExam" value="{{ IdExam }}">
-
                 <input type="hidden" name="Link">
                 <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Test name<span class="text-danger">*</span></label>
@@ -118,7 +118,7 @@
 
             <p class="lead">
               <button type="submit"  class="btn btn-lg btn-primary border-white bg-blue">Conferma Modifiche </button>
-              <a href='teacherShowMyExams.html' class="btn btn-lg btn-danger border-white bg-blue">Annulla modifiche</a>
+              <a href='teacherShowMyTests.html' class="btn btn-lg btn-danger border-white bg-blue">Annulla modifiche</a>
             </p>
           </form>
 
