@@ -179,6 +179,19 @@ def showTeacherTests():
     else:
         return redirect('/')
 
+@app_teacherTest.route('/newExamAppealData', methods=['GET', 'POST'])
+@login_required
+def newExamAppealData():
+    if current_user.is_authenticated:
+        IdExamForm = int(request.form["IdExam"])
+        IdTestForm = int(request.form["IdTest"])
+        DataForm = request.form["data"] # si decide la data del proprio test di quell'esame
+
+        tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+        return render_template('teacherUpdateTests.html')
+    else:
+        redirect('/')
 
 @app_teacherTest.route('/registrationTest', methods=['GET', 'POST'])
 def registrationTest():

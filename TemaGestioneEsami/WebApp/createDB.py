@@ -52,8 +52,8 @@ class IsEnrolled(Base):
     Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdExam = Column(Integer, ForeignKey('Exams.Id'))
-    DataRegistrazioneVoto = Column(DateTime)
-    DataScadenzaVoto = Column(DateTime)
+    DataRegistrazioneVoto = Column(String)
+    DataScadenzaVoto = Column(String)
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdExam', name="student_uc"),)
 
@@ -129,7 +129,7 @@ class ExamAppeals(Base):
     # dichiarazione dei campi della tabella
 
     Id = Column(Integer, primary_key=True)
-    ExamData = Column(DateTime, nullable=False)
+    ExamData = Column(String, nullable=False)
     IdTest = Column(Integer, ForeignKey('Tests.Id'))
     # relazione con test 1 a n
     Test = relationship('Tests', back_populates="Appeals")

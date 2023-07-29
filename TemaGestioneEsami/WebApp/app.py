@@ -251,7 +251,7 @@ def updateTeacherInfo():
         session.query(Teachers).filter(and_(Teachers.Id == current_user.id)).update(
             {Teachers.Name: nameForm, Teachers.Surname: surnameForm, Teachers.Telephone: telephoneForm, Teachers.Email: emailForm})
         session.commit()
-        return render_template('teacherArea.html')
+        return render_template('teacherArea.html', name=nameForm, surname=surnameForm)
     else:
         redirect('/')
 
