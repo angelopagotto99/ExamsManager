@@ -17,6 +17,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_bcrypt import Bcrypt
 
 from teacherExam import app_teacherExam
+from teacherTest import app_teacherTest
 
 app = Flask(__name__)
 
@@ -31,6 +32,7 @@ bcrypt = Bcrypt(app)
 app.config['SECRET_KEY'] = 'ubersecret'
 
 app.register_blueprint(app_teacherExam)
+app.register_blueprint(app_teacherTest)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)

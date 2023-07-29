@@ -36,7 +36,8 @@ Base.prepare(engine, reflect=True)
 Students = Base.classes.Students
 Teachers = Base.classes.Teachers
 Exams = Base.classes.Exams
-isEnrolled = Base.classes.isEnrolled
+isEnrolled = Base.classes.IsEnrolled
+Test = Base.classes.Tests
 
 
 
@@ -75,41 +76,40 @@ def newExam():
 
 @app_teacherExam.route('/showAllTeacherExam')
 @login_required
-def showAllTeacherCourses():
+def showAllTeacherExam():
     if current_user.is_authenticated:
         # Mostra tutti i corsi del docente corrente
-        AllExams = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.Faculty, Exams.CFU,
+        AllExams = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.Faculty, Exams.CFU, Exams.Enrollments,
                                    Exams.IdTeacher).filter(Exams.IdTeacher == current_user.id)
 
         # numero d'iscrizioni fatte per ciascun esame
         nEnrollmentsGroup = \
             session.query(func.count(isEnrolled.Id), isEnrolled.IdExam, Exams.nTest) \
                 .join(Exams) \
-                .group_by(isEnrolled.IdExam, Exams.MaxEnrollments)
-        enrolledCoursesId = session.query(EnrolledStudents.IdCourse).distinct(EnrolledStudents.IdCourse)
-        neverEnrolledCourses = session.query(Courses.Id, Courses.MaxEnrollments).filter(
-            Courses.Id.notin_(enrolledCoursesId))
+                .group_by(isEnrolled.IdExam, Exams.Enrollments)
+        enrolledExamId = session.query(isEnrolled.IdExam).distinct(isEnrolled.IdExam)
+        neverEnrolledCourses = session.query(Exams.Id, Exams.Enrollments).filter(
+            Exams.Id.notin_(enrolledExamId))
 
         # informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
-        return render_template('teacherShowMyCourses.html', teachersInfo=teachersInfo,
-                               myCourses=AllCourses, nEnrollmentsGroup=nEnrollmentsGroup,
+        return render_template('teacherShowMyExams.html', teachersInfo=teachersInfo,
+                               myCourses=AllExams, nEnrollmentsGroup=nEnrollmentsGroup,
                                neverEnrolledCourses=neverEnrolledCourses)
     else:
         return redirect('/')
 
-'''
+
 
 @app_teacherExam.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
 @login_required
 def enrolledStudents():
     if current_user.is_authenticated:
-        IdCourseForm = int(request.form["IdCourse"])
+        IdExamForm = int(request.form["IdExam"])
         # Mostra tutti gli studenti iscritti ai relativi corsi
-        AllStudents = session.query(EnrolledStudents.IdStudent, Students.Surname, Students.Name,
-                                    EnrolledStudents.EnrollmentDate,
+        AllStudents = session.query(isEnrolled.IdStudent, Students.Surname, Students.Name,
                                     Students.Email).filter(
-            and_(EnrolledStudents.IdStudent == Students.Id, EnrolledStudents.IdCourse == IdCourseForm)).order_by(
+            and_(isEnrolled.IdStudent == Students.Id, isEnrolled.IdExam == IdExamForm)).order_by(
             Students.Email)
 
         return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents)
@@ -117,42 +117,41 @@ def enrolledStudents():
         return redirect('/')
 
 
-# tengo o non tengo traccia delle lezioni che ha svolto lo studente relative al corso?
-# tengo o non tengo traccia delle prenotazioni dello studente relative al corso?
-@app_teacherExam.route('/unenrollCourse', methods=['GET', 'POST'])
-def unenrollCourse():
+# tengo o non tengo traccia delle prenotazioni dello studente relative all' esame?
+@app_teacherExam.route('/unenrollExam', methods=['GET', 'POST'])
+def unenrollExam():
     if current_user.is_authenticated:
-        IdCourseForm = int(request.form["IdCourse"])
+        IdExamForm = int(request.form["IdExam"])
 
         # rimuovo l'occorrenza che identifica che lo studente segue quel corso
-        session.query(EnrolledStudents).filter(and_(EnrolledStudents.IdCourse == IdCourseForm)).delete()
-        lessonsId = session.query(Lessons.Id).filter(Lessons.IdCourse == IdCourseForm)
-        session.query(OnlineLessons).filter(and_(OnlineLessons.Id.in_(lessonsId))).delete(synchronize_session='fetch')
-        session.query(FaceToFaceLessons).filter(and_(FaceToFaceLessons.Id.in_(lessonsId))).delete(synchronize_session='fetch')
-        session.query(Lessons).filter(and_(Lessons.IdCourse == IdCourseForm)).delete()
-        session.query(Courses).filter(and_(Courses.Id == IdCourseForm)).delete()
+        session.query(isEnrolled).filter(and_(isEnrolled.IdExam == IdExamForm)).delete()
+        session.query(Test.Id).filter(Test.IdExam == IdExamForm)
+        session.query(Test).filter(and_(Test.IdExam == IdExamForm)).delete()
+        session.query(Exams).filter(and_(Exams.Id == IdExamForm)).delete()
         session.commit()
 
         return render_template('teacherArea.html')
     else:
         return redirect('/')
 
-
-# controllare il numero di posti disponibili nelle lezioni FTF per garantire la possibilità di prenotarsi
-@app_teacherExam.route('/showTeacherLessons', methods=['GET', 'POST'])
-def showTeacherLessons():
+# mostra tutti i test creati per un certo esame
+@app_teacherExam.route('/showTeacherTest', methods=['GET', 'POST'])
+def showTeacherTest():
     if current_user.is_authenticated:
-        IdCourseForm = int(request.form["IdCourse"])
+        IdExamForm = int(request.form["IdExam"])
 
-        lessons = session.query(Lessons).filter(Lessons.IdCourse == IdCourseForm).order_by(Lessons.Date)
-        courseInfo = session.query(Courses).filter(Courses.Id == IdCourseForm)
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
 
-        return render_template('teacherShowMyLessons.html', lessons=lessons, course=courseInfo)
+        return render_template('teacherShowMyTests.html', myTest=tests, course=testInfo)
     else:
         return redirect('/')
-
-'''
 
 @app_teacherExam.route('/registrationExam')
 def registrationExam():
     return render_template('teacherExamRegistration.html')
+
+@app_teacherExam.route('/registrationTest')
+def registrationTest():
+    return render_template('teacherRegistrationTest.html')
+
