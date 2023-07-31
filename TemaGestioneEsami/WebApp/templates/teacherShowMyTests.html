@@ -97,8 +97,9 @@
               <thead>
                 <tr>
                   <th scope="col"></th>
-                  <th scope="col" class="w-75">Nome del test</th>
-                    <th scope="col" class="w-25">Tipologia</th>
+                  <th scope="col" class="w-60">Nome del test</th>
+                    <th scope="col" class="w-15">Tipologia</th>
+                    <th scope="col" class="w-25">Orario</th>
                     <th scope="col" class="w-25">Tipo Valutatione</th>
                     <th scope="col" class="w-25">Azioni</th>
 
@@ -107,12 +108,20 @@
               </thead>
             <tbody>
 
-            {% for c in myTest %}
+            {% for c in myTest%}
+
             <tr>
-                        <th class="w-auto" scope="row"></th>
+              <th class="w-auto" scope="row"></th>
 
                     <td class="w-25">{{ c.TestName }}</td>
-                      <td class="w-25">{{ c.Tipology }}</td>
+              <td class="w-25">{{ c.Tipology }}</td>
+                      <td class="w-15">
+                          {% for s in myAppeal %}
+                              {% if s.IdTest == c.Id %}
+                        <p> {{ s.ExamData }} </p>
+                              {% endif %}
+                          {% endfor %}
+                      </td>
                       <td class="w-25">{{ c.ValType }}</td>
 
                 <td>

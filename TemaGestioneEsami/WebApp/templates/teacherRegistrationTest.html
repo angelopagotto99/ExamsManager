@@ -120,6 +120,15 @@
               {% endif %}
             </div>
 
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Date <span class="text-danger">*</span></label>
+                {% if error is not defined %}
+                <input name="data" type="datetime-local" class="form-control" required>
+              {% else %}
+                <input name="data" type="datetime-local" class="form-control" required>
+              {% endif %}
+            </div>
+
 
             <p class="lead">
               <button type="submit" class="btn btn-lg btn-primary border-white bg-blue">Registra Test</button>

@@ -39,6 +39,7 @@ Teachers = Base.classes.Teachers
 Exams = Base.classes.Exams
 Tests = Base.classes.Tests
 EnrolledStudents = Base.classes.IsEnrolled
+Appeals = Base.classes.ExamAppeals
 
 
 
@@ -49,6 +50,7 @@ def newTest():
     NameForm = request.form["name"]
     TipoForm = request.form["type"]
     ValForm = request.form["value"]
+    DateForm = request.form["data"]  # si decide la data del proprio test di quell'esame
     # dateFormCast = datetime.strptime(DateForm, '%d/%m/%Y').date()
 
     if current_user.is_authenticated:
@@ -57,6 +59,7 @@ def newTest():
             # aggiungo la lezione al database
             checkUsedName = session.query(Tests.Id).filter(and_(Tests.TestName == NameForm,
                                                                        Tests.Id == IdExamForm)).first()
+
             if checkUsedName is None:
                 newTests = Tests(TestName=NameForm, Tipology=TipoForm ,ValType=ValForm, IdExam=IdExamForm, IdResponsabile=current_user.id)
                 session.add(newTests)  # aggiunge il corso al database
@@ -69,7 +72,11 @@ def newTest():
                                          Exams.CFU,
                                          Exams.Enrollments,
                                          Exams.IdTeacher).filter(Exams.IdTeacher == current_user.id)
-                return render_template('teacherShowMyExams.html', IdTest=idTests, checkUsedName=checkUsedName , IdExam=IdExamForm, myCourses=AllExams)
+                newExamAppeal = Appeals(ExamData=DateForm, IdTest=idTests.Id)
+                session.add(newExamAppeal)
+                session.commit()
+                AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest).filter(Appeals.IdTest == idTests.Id)
+                return render_template('teacherShowMyExams.html', IdTest=idTests, checkUsedName=checkUsedName , IdExam=IdExamForm, myCourses=AllExams, myAppeal=AllAppealData)
 
             else:
                 return render_template('teacherRegistrationTest.html', error="Nome del test già utilizzato",
@@ -90,12 +97,12 @@ def showAllTeacherTests():
     if current_user.is_authenticated:
         # Mostra tutti test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
+        IdTestForm = int(request.form["IdTest"])
+
 
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
-        testId = session.query(Tests.Id).filter(Tests.IdExam == IdExamForm)
-
-
-        return render_template('teacherShowMyTests.html', myTest=tests)
+        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == IdTestForm)
+        return render_template('teacherShowMyTests.html', myTest=tests, myAppeal=AllAppealData)
     else:
         return redirect('/')
 
@@ -107,13 +114,16 @@ def deleteCurrentTest():
 
         IdExamForm = int(request.form["IdExam"])
         IdTestForm = int(request.form["IdTest"])
+
         # Mostra tutti gli studenti iscritti ai relativi esami
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
+        dates = session.query(Appeals).filter(Appeals.IdTest == IdTestForm).order_by(Appeals.ExamData)
+        session.query(Appeals).filter(and_(Appeals.IdTest == IdTestForm)).delete()
         session.query(Tests).filter(and_(Tests.IdExam == IdExamForm, Tests.Id==IdTestForm)).delete()
-        #session.query(Tests).filter(and_(Tests.IdResponsabile == IdResponsabileForm)).delete()
+
         session.commit()
 
-        return render_template('teacherShowMyTests.html', IdExam=IdExamForm,myTest=tests)
+        return render_template('teacherShowMyTests.html', IdExam=IdExamForm, myTest=tests, myAppeal=dates)
     else:
         return redirect('/')
 
@@ -127,7 +137,8 @@ def updateCurrentTest():
         IdExamForm = int(request.form["IdExam"])
         IdTestForm = int(request.form["IdTest"])
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).first()
-        return render_template('teacherUpdateTests.html', myTest=tests, IdExam=IdExamForm, IdTest=IdTestForm)
+        dates = session.query(Appeals).filter(Appeals.IdTest == IdTestForm).first()
+        return render_template('teacherUpdateTests.html', myTest=tests, IdExam=IdExamForm, IdTest=IdTestForm, myAppeal=dates)
     else:
         return redirect('/')
 
@@ -140,10 +151,15 @@ def ReUpdateCurrentTest():
         IdTestForm = int(request.form["IdTest"])
         IdExamForm = int(request.form["IdExam"])
 
+
         NameForm = request.form["name"]
         TipoForm = request.form["type"]
         ValForm = request.form["value"]
-        session.query(Tests).filter(and_(Tests.Id==IdTestForm,Tests.IdExam==IdExamForm)).update({Tests.TestName: NameForm , Tests.Tipology: TipoForm, Tests.ValType: ValForm})
+        DataForm= request.form["date"]
+
+        session.query(Tests).filter(and_(Tests.Id==IdTestForm, Tests.IdExam==IdExamForm)).update({Tests.TestName: NameForm , Tests.Tipology: TipoForm, Tests.ValType: ValForm})
+        session.query(Appeals).filter(and_(Appeals.IdTest==IdTestForm)).update({Appeals.ExamData:DataForm})
+
         session.commit()
         return render_template('teacherArea.html')
     else:
@@ -172,26 +188,16 @@ def showTeacherTests():
     if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
 
-        tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+        tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
+        idTests = session.query(Tests.Id).filter(
+            and_(Tests.IdExam == IdExamForm)).first()
+        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == idTests.Id)
 
-        return render_template('teacherShowMyTests.html', test=tests, exam=testInfo)
+        return render_template('teacherShowMyTests.html', myTest=tests,test=tests, exam=testInfo, myAppeal=AllAppealData)
     else:
         return redirect('/')
 
-@app_teacherTest.route('/newExamAppealData', methods=['GET', 'POST'])
-@login_required
-def newExamAppealData():
-    if current_user.is_authenticated:
-        IdExamForm = int(request.form["IdExam"])
-        IdTestForm = int(request.form["IdTest"])
-        DataForm = request.form["data"] # si decide la data del proprio test di quell'esame
-
-        tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
-        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
-        return render_template('teacherUpdateTests.html')
-    else:
-        redirect('/')
 
 @app_teacherTest.route('/registrationTest', methods=['GET', 'POST'])
 def registrationTest():
@@ -200,3 +206,4 @@ def registrationTest():
         return render_template('teacherRegistrationTest.html', IdExam=IdExamForm)
     else:
         return redirect('/')
+

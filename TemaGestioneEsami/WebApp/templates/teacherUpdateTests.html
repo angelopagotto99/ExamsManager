@@ -87,6 +87,8 @@
 
               <input type="hidden" name="IdTest" value="{{ IdTest }}">
               <input type="hidden" name="IdExam" value="{{ IdExam }}">
+
+
                 <input type="hidden" name="Link">
                 <div class="mb-3">
                 <label for="exampleInputEmail1" class="form-label">Test name<span class="text-danger">*</span></label>
@@ -115,6 +117,16 @@
                 </select>
               {% endif %}
             </div>
+
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Date <span class="text-danger">*</span></label>
+                {% if error is not defined %}
+                <input name="date" type="datetime-local" class="form-control" value="myAppeal.ExamData" required>
+              {% else %}
+                <input name="date" type="datetime-local" class="form-control" required>
+              {% endif %}
+            </div>
+
 
             <p class="lead">
               <button type="submit"  class="btn btn-lg btn-primary border-white bg-blue">Conferma Modifiche </button>

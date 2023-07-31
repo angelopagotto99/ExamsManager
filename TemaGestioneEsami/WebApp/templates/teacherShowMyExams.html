@@ -117,8 +117,9 @@
                           <button type="submit" class="btn btn-outline-dark">CREA TEST</button>
                         </form>
 
-                        <form action='/showTeacherTest' method="POST" class="d-inline">
+                        <form action='/showTeacherTests' method="POST" class="d-inline">
                           <input type="hidden" name="IdExam" value="{{ c.Id }}">
+                          <input type="hidden" name="IdTest" value="{{ c.IdTest }}">
                           <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
                         </form>
 
