@@ -100,17 +100,21 @@
               <thead>
                 <tr>
                   <th scope="col"></th>
-                  <th scope="col" class="w-75">Nome del corso</th>
-                  <th scope="col" class="w-auto">Azioni</th>
+                  <th scope="col" class="w-15">Nome del corso</th>
+                  <th scope="col" class="w-75">Numero di Test Creati</th>
+
+                  <th scope="col" class="w-60">Azioni</th>
                 </tr>
               </thead>
               <tbody>
                 {% for c in myCourses %}
                   <tr>
                     <th class="w-auto" scope="row"></th>
-                    <td class="w-50">{{ c.ExamName }}</td>
+                    <td class="w-25">{{ c.ExamName }}</td>
+                    <td class="w-50">{{ c.NumTestCreati }} su {{ c.nTest }}</td>
                     <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
                       <span class="col-md-auto display-inlineblock">
+
 
                         <form action='/registrationTest' method="POST" class="d-inline">
                           <input type="hidden" name="IdExam" value="{{ c.Id }}">

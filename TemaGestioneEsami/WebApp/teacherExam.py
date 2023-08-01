@@ -79,8 +79,27 @@ def newExam():
 def showAllTeacherExam():
     if current_user.is_authenticated:
         # Mostra tutti i corsi del docente corrente
-        AllExams = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.Faculty, Exams.CFU, Exams.Enrollments,
-                                   Exams.IdTeacher).filter(Exams.IdTeacher == current_user.id)
+        if current_user.is_authenticated:
+            # Mostra tutti i corsi del docente corrente, includendo il numero di test creati per ciascun esame
+            AllExams = session.query(Exams.Id,
+                                     Exams.ExamName,
+                                     Exams.Description,
+                                     Exams.nTest,
+                                     Exams.Faculty,
+                                     Exams.CFU,
+                                     Exams.Enrollments,
+                                     Exams.IdTeacher,
+                                     func.count(Test.Id).label('NumTestCreati')) \
+                .outerjoin(Test, Test.IdExam == Exams.Id) \
+                .filter(Exams.IdTeacher == current_user.id) \
+                .group_by(Exams.Id,
+                          Exams.ExamName,
+                          Exams.Description,
+                          Exams.nTest,
+                          Exams.Faculty,
+                          Exams.CFU,
+                          Exams.Enrollments,
+                          Exams.IdTeacher)
 
         # numero d'iscrizioni fatte per ciascun esame
         nEnrollmentsGroup = \

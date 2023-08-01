@@ -184,17 +184,22 @@ def enrolledStudents():
 
 # controllare il numero di posti disponibili nelle lezioni FTF per garantire la possibilità di prenotarsi
 @app_teacherTest.route('/showTeacherTests', methods=['GET', 'POST'])
+@login_required
 def showTeacherTests():
     if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
 
         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
-        idTests = session.query(Tests.Id).filter(
-            and_(Tests.IdExam == IdExamForm)).first()
-        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == idTests.Id)
 
-        return render_template('teacherShowMyTests.html', myTest=tests,test=tests, exam=testInfo, myAppeal=AllAppealData)
+        # Recupera tutti gli id dei test associati all'esame
+        test_ids = [test.Id for test in tests]
+
+        # Recupera le date degli appelli per ciascun test
+        AllAppealData = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids))
+
+        return render_template('teacherShowMyTests.html', myTest=tests, test=tests, exam=testInfo,
+                               myAppeal=AllAppealData)
     else:
         return redirect('/')
 
