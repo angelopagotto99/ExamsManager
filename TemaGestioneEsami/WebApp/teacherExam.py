@@ -120,22 +120,6 @@ def showAllTeacherExam():
 
 
 
-@app_teacherExam.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
-@login_required
-def enrolledStudents():
-    if current_user.is_authenticated:
-        IdExamForm = int(request.form["IdExam"])
-        # Mostra tutti gli studenti iscritti ai relativi corsi
-        AllStudents = session.query(isEnrolled.IdStudent, Students.Surname, Students.Name,
-                                    Students.Email).filter(
-            and_(isEnrolled.IdStudent == Students.Id, isEnrolled.IdExam == IdExamForm)).order_by(
-            Students.Email)
-
-        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents)
-    else:
-        return redirect('/')
-
-
 # tengo o non tengo traccia delle prenotazioni dello studente relative all' esame?
 @app_teacherExam.route('/unenrollExam', methods=['GET', 'POST'])
 def unenrollExam():

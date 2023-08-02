@@ -14,7 +14,7 @@ import random
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy.orm import sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -167,6 +167,30 @@ def showAllTeacherTests():
     else:
         return redirect('/')
 
+@app_teacherTest.route('/showAllTeacherAppeal', methods=['GET', 'POST'])
+@login_required
+def showAllTeacherAppeal():
+    if current_user.is_authenticated:
+
+        # Recupera tutti gli esami del docente corrente
+        exams = session.query(Exams).filter(Exams.IdTeacher == current_user.id).all()
+        tests = session.query(Tests).filter(Tests.IdExam.in_([exam.Id for exam in exams])).order_by(Tests.TestName)
+        # Recupera le date degli appelli per ciascun test
+        AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == Exams.Id)
+        # Recupera tutti gli appelli dei test dei vari esami
+        all_appeals = session.query(Appeals, Tests, Exams).join(Tests, Appeals.IdTest == Tests.Id).\
+            join(Exams,Tests.IdExam == Exams.Id).filter(Exams.IdTeacher == current_user.id).\
+            order_by(Tests.TestName, Appeals.ExamData).all()
+
+        num_enrolled_students = session.query(func.count(EnrolledStudents.Id)).filter(
+            EnrolledStudents.IdExam == Tests.IdExam).scalar()
+
+
+        return render_template('teacherShowMyAppeal.html', exams=AllExams, all_appeals_data=all_appeals,Iscritti=num_enrolled_students)
+    else:
+        return redirect('/')
+
+
 @app_teacherTest.route('/deleteCurrentTest', methods=['GET', 'POST'])
 @login_required
 def deleteCurrentTest():
@@ -225,23 +249,6 @@ def ReUpdateCurrentTest():
         return render_template('teacherArea.html')
     else:
         return redirect('/')
-
-@app_teacherTest.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
-@login_required
-def enrolledStudents():
-    if current_user.is_authenticated:
-        IdExamForm = int(request.form["IdExam"])
-        # Mostra tutti gli studenti iscritti ai relativi corsi
-        AllStudents = session.query(EnrolledStudents.IdStudent, Students.Surname, Students.Name,
-                                    EnrolledStudents.EnrollmentDate,
-                                    Students.Email).filter(
-            and_(EnrolledStudents.IdStudent == Students.Id, EnrolledStudents.IdExam == IdExamForm)).order_by(
-            Students.Email)
-
-        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents)
-    else:
-        return redirect('/')
-
 
 
 @app_teacherTest.route('/registrationTest', methods=['GET', 'POST'])
