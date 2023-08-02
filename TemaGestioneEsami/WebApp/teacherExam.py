@@ -38,6 +38,7 @@ Teachers = Base.classes.Teachers
 Exams = Base.classes.Exams
 isEnrolled = Base.classes.IsEnrolled
 Test = Base.classes.Tests
+Appeals = Base.classes.ExamAppeals
 
 
 
@@ -109,7 +110,6 @@ def showAllTeacherExam():
         enrolledExamId = session.query(isEnrolled.IdExam).distinct(isEnrolled.IdExam)
         neverEnrolledCourses = session.query(Exams.Id, Exams.Enrollments).filter(
             Exams.Id.notin_(enrolledExamId))
-
         # informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
         return render_template('teacherShowMyExams.html', teachersInfo=teachersInfo,
@@ -144,6 +144,7 @@ def unenrollExam():
 
         # rimuovo l'occorrenza che identifica che lo studente segue quel corso
         session.query(isEnrolled).filter(and_(isEnrolled.IdExam == IdExamForm)).delete()
+        session.query(Appeals).filter(Appeals.IdTest == Test.Id)
         session.query(Test.Id).filter(Test.IdExam == IdExamForm)
         session.query(Test).filter(and_(Test.IdExam == IdExamForm)).delete()
         session.query(Exams).filter(and_(Exams.Id == IdExamForm)).delete()
@@ -154,15 +155,24 @@ def unenrollExam():
         return redirect('/')
 
 # mostra tutti i test creati per un certo esame
-@app_teacherExam.route('/showTeacherTest', methods=['GET', 'POST'])
-def showTeacherTest():
+@app_teacherExam.route('/showTeacherTests', methods=['GET', 'POST'])
+def showTeacherTests():
     if current_user.is_authenticated:
+        # Mostra tutti test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 
-        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
-        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
 
-        return render_template('teacherShowMyTests.html', myTest=tests, course=testInfo)
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+
+        # Recupera tutti gli id dei test associati all'esame
+        test_ids = [test.Id for test in tests]
+        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
+        # Recupera le date degli appelli per ciascun test
+        AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
+        return render_template('teacherShowMyTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
     else:
         return redirect('/')
 

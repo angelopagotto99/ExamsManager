@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.83.1">
-    <title>My Courses</title>
+    <title>My Exams</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/pricing/">
 
@@ -103,7 +103,7 @@
                   <th scope="col" class="w-15">Nome del corso</th>
                   <th scope="col" class="w-75">Numero di Test Creati</th>
 
-                  <th scope="col" class="w-60">Azioni</th>
+                  <th scope="col" class="w-75">Azioni</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,11 +126,6 @@
                           <input type="hidden" name="IdTest" value="{{ c.IdTest }}">
                           <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
                         </form>
-
-                          <form action='/showAllEnrolledStudents' method="POST" class="d-inline">
-                            <input type="hidden" name="IdExam" value="{{ c.Id }}">
-                            <button type="submit" class="btn btn-outline-dark">MOSTRA STUDENTI ISCRITTI</button>
-                          </form>
 
                           <form action='/unenrollExam' method="POST" class="d-inline">
                           <input type="hidden" name="IdExam" value="{{ c.Id }}">

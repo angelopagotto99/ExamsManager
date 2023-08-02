@@ -6,7 +6,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.83.1">
-    <title>My Lessons</title>
+    <title>My Tests</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/pricing/">
 
@@ -78,7 +78,7 @@
 
         <header>
           <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-              <a class="me-3 py-2 text-dark text-decoration-none" href='/logout'><span class="fs-4">EXAM_MANAGER</span></a>
+              <a class="me-3 py-2 text-dark text-decoration-none" href='/teacherArea'><span class="fs-4">EXAM_MANAGER</span></a>
 
             <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
               <a class="me-3 py-2 text-dark text-decoration-none" href='/logout'>LOGOUT</a>
@@ -99,10 +99,8 @@
                   <th scope="col"></th>
                   <th scope="col" class="w-60">Nome del test</th>
                     <th scope="col" class="w-15">Tipologia</th>
-                    <th scope="col" class="w-25">Orario</th>
                     <th scope="col" class="w-25">Tipo Valutatione</th>
                     <th scope="col" class="w-25">Azioni</th>
-
 
                 </tr>
               </thead>
@@ -113,24 +111,25 @@
             <tr>
               <th class="w-auto" scope="row"></th>
 
-                    <td class="w-25">{{ c.TestName }}</td>
-              <td class="w-25">{{ c.Tipology }}</td>
-                      <td class="w-15">
-                          {% for s in myAppeal %}
-                              {% if s.IdTest == c.Id %}
-                        <p> {{ s.ExamData }} </p>
-                              {% endif %}
-                          {% endfor %}
-                      </td>
-                      <td class="w-25">{{ c.ValType }}</td>
+                    <td class="w-25">{{ c.TestName }} </td>
+                    <td class="w-25">{{ c.Tipology }} </td>
+                    <td class="w-25">{{ c.ValType }}  </td>
 
                 <td>
+                  {% if myAppeal.IdTest not in myTest %}
+                  <form action='/registrationAppeal' method="POST" class="d-inline">
+                    <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
+                      <input type="hidden" name="IdTest" value="{{ c.Id }}">
 
+                        <button type="submit" class="btn btn-outline-dark">CREA APPELLO</button>
+                   </form>
+                  {% endif %}
                    <form action='/updateCurrentTest' method="POST" class="d-inline">
                     <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
                       <input type="hidden" name="IdTest" value="{{ c.Id }}">
                   <button type="submit" class="btn btn-outline-dark">MODIFICA</button>
                    </form>
+
 
                     <form action='/deleteCurrentTest' method="POST" class="d-inline">
                     <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
