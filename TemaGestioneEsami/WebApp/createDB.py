@@ -92,7 +92,6 @@ class Exams(Base):
     IdTeacher = Column(Integer, ForeignKey('Teachers.Id'))
     Faculty = Column(String(30), nullable=False)
     CFU = Column(Integer, nullable=False)
-    Enrollments = Column(Integer, nullable=True)
 
     Teacher = relationship('Teachers', back_populates="Exams")
     Tests = relationship('Tests', back_populates="Exam")
