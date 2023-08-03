@@ -34,8 +34,6 @@ class Sustains(Base):
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.Id'))
     Valutation = Column(Float, nullable=False)
-    Idoneo = Column(Boolean, nullable=False, default=False)
-    isBonus = Column(Boolean, nullable=False, default=False)
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),)
 
@@ -52,8 +50,7 @@ class IsEnrolled(Base):
     Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdExam = Column(Integer, ForeignKey('Exams.Id'))
-    DataRegistrazioneVoto = Column(String)
-    DataScadenzaVoto = Column(String)
+    Valutation = Column(String, nullable=True)
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdExam', name="student_uc"),)
 
@@ -130,6 +127,8 @@ class ExamAppeals(Base):
 
     Id = Column(Integer, primary_key=True)
     ExamData = Column(String, nullable=False)
+    ValutationExpireData = Column(String, nullable=False)
+
     IdTest = Column(Integer, ForeignKey('Tests.Id'))
     # relazione con test 1 a n
     Test = relationship('Tests', back_populates="Appeals")
