@@ -126,6 +126,21 @@
               {% endif %}
             </div>
 
+            <div class="mb-3">
+              <label for="exampleInputEmail" class="form-label">Valutation Type<span class="text-danger">*</span></label>
+              {% if error is not defined %}
+                <select name="type" class="form-control" required>
+                  <option value="Esame">Voto in trentesimi</option>
+                  <option value="Idoneità">Idoneità</option>
+                </select>
+              {% else %}
+                <select name="type" class="form-control" required>
+                  <option value="Esame" {% if type == 'Voto in trentesimi' %} selected {% endif %}>Esame</option>
+                  <option value="Idoneità" {% if type == 'Idoneità' %} selected {% endif %}>Idoneità</option>
+                </select>
+              {% endif %}
+            </div>
+
               <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">CFU <span class="text-danger">*</span></label>
               {% if error is not defined %}

@@ -33,7 +33,7 @@ class Sustains(Base):
     Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.Id'))
-    Valutation = Column(Float, nullable=False)
+    Valutation = Column(Float, nullable=True)
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),)
 
@@ -92,6 +92,7 @@ class Exams(Base):
     IdTeacher = Column(Integer, ForeignKey('Teachers.Id'))
     Faculty = Column(String(30), nullable=False)
     CFU = Column(Integer, nullable=False)
+    isIdoneo = Column(Boolean, nullable=False)
 
     Teacher = relationship('Teachers', back_populates="Exams")
     Tests = relationship('Tests', back_populates="Exam")

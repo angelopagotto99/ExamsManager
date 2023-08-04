@@ -51,19 +51,30 @@ def newExam():
     nTestForm = int(request.form["nTest"])
     FacultyForm = request.form["num"]
     CFUForm = int(request.form["CFU"])
+    ValTypeForm = request.form["type"]
+
     if current_user.is_authenticated:
         if request.method == 'POST':
             # controllo sul titolo del corso
             usedTitle = session.query(Exams.Id).filter(Exams.ExamName == ExamForm).first()
             if usedTitle is None:  # controlla se titleForm è usata da qualche docente
                 # titleForm non è usata da nessun docente
-                # aggiungo il corso al database
-                newExam = Exams(ExamName=ExamForm, Description=DescriptionForm, nTest=nTestForm,
-                                    Faculty=FacultyForm, CFU=CFUForm,
+                if ValTypeForm == 'Idoneità':
+                    # aggiungo il corso al database
+                    newExam = Exams(ExamName=ExamForm, Description=DescriptionForm, nTest=nTestForm,
+                                        Faculty=FacultyForm, CFU=CFUForm, isIdoneo=True,
+                                        IdTeacher=current_user.id)
+                    session.add(newExam)  # aggiunge il corso al database
+                    session.commit()  # conferma le modifiche
+                    return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
+                else:
+                    # aggiungo il corso al database
+                    newExam = Exams(ExamName=ExamForm, Description=DescriptionForm, nTest=nTestForm,
+                                    Faculty=FacultyForm, CFU=CFUForm, isIdoneo=False,
                                     IdTeacher=current_user.id)
-                session.add(newExam)  # aggiunge il corso al database
-                session.commit()  # conferma le modifiche
-                return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
+                    session.add(newExam)  # aggiunge il corso al database
+                    session.commit()  # conferma le modifiche
+                    return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
             else:
                 return render_template('teacherExamRegistration.html', error="titolo", title=ExamForm,
                                        Description=DescriptionForm,

@@ -105,7 +105,7 @@ def enrollStudent():
         session.add(newEnrollment)
         session.commit()
 
-        return render_template('studentArea.html')
+        return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
     else:
         return redirect('/')
 
