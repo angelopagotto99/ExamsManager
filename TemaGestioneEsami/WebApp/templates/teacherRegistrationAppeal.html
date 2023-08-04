@@ -93,7 +93,14 @@
                 <input name="data" type="datetime-local" class="form-control" required>
               {% endif %}
             </div>
-       </div>
+                <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label">Valutation expire data <span class="text-danger">*</span></label>
+                {% if error is not defined %}
+                <input name="dataEx" type="datetime-local" class="form-control" required>
+              {% else %}
+            <input name="dataEx" type="datetime-local" class="form-control" required>
+              {% endif %}
+            </div>
 
 
             <p class="lead">

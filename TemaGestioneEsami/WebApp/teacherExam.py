@@ -88,7 +88,6 @@ def showAllTeacherExam():
                                      Exams.nTest,
                                      Exams.Faculty,
                                      Exams.CFU,
-                                     Exams.Enrollments,
                                      Exams.IdTeacher,
                                      func.count(Test.Id).label('NumTestCreati')) \
                 .outerjoin(Test, Test.IdExam == Exams.Id) \
@@ -99,16 +98,15 @@ def showAllTeacherExam():
                           Exams.nTest,
                           Exams.Faculty,
                           Exams.CFU,
-                          Exams.Enrollments,
                           Exams.IdTeacher)
 
         # numero d'iscrizioni fatte per ciascun esame
         nEnrollmentsGroup = \
             session.query(func.count(isEnrolled.Id), isEnrolled.IdExam, Exams.nTest) \
                 .join(Exams) \
-                .group_by(isEnrolled.IdExam, Exams.Enrollments)
+                .group_by(isEnrolled.IdExam)
         enrolledExamId = session.query(isEnrolled.IdExam).distinct(isEnrolled.IdExam)
-        neverEnrolledCourses = session.query(Exams.Id, Exams.Enrollments).filter(
+        neverEnrolledCourses = session.query(Exams.Id).filter(
             Exams.Id.notin_(enrolledExamId))
         # informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)

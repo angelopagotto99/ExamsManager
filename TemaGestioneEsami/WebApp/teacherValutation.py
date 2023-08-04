@@ -73,7 +73,7 @@ def showAllTeacherAppeal():
 
         num_enrolled_students = session.query(func.count(Appeals.Id)).filter(Appeals.IdTest == Tests.Id).scalar()
 
-        return render_template('teacherShowMyAppeal.html', exams=exams, all_appeals_data=all_appeals_data,Iscritti=num_enrolled_students)
+        return render_template('teacherShowMyAppeal.html', exams=exams, all_appeals_data=all_appeals_data, Iscritti=num_enrolled_students)
     else:
         return redirect('/')
 

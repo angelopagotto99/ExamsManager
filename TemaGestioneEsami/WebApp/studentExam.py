@@ -18,6 +18,7 @@ from sqlalchemy.orm import sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date
+from sqlalchemy.orm import joinedload
 
 # mantiene il collegamento con l'app principale mainPage
 app_studentExam = Blueprint('app_studentExam', __name__)
@@ -62,7 +63,51 @@ def showAllCourses():
     else:
         return redirect('/')
 
+@app_studentExam.route('/showAllExamTest', methods=['GET', 'POST'])
+def showAllExamTest():
+    if current_user.is_authenticated:
+        # Mostra tutti test dell'esame del docente corrente
+        IdExamForm = int(request.form["IdExam"])
 
+
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+
+        # Recupera tutti gli id dei test associati all'esame
+        test_ids = [test.Id for test in tests]
+        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
+        # Recupera le date degli appelli per ciascun test
+        AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
+        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
+    else:
+        return redirect('/')
+
+@app_studentExam.route('/showMyEnrolledExam')
+@login_required
+def showMyEnrolledExam():
+    if current_user.is_authenticated:
+        myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
+        coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
+        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo)
+    else:
+        return redirect('/')
+
+@app_studentExam.route('/enrollStudent', methods=['GET', 'POST'])
+@login_required
+def enrollStudent():
+    if current_user.is_authenticated:
+        IdExamForm = int(request.form["IdExam"])
+        today = date.today()
+
+        newEnrollment = isEnrolled(IdStudent=current_user.id, IdExam=IdExamForm)
+        session.add(newEnrollment)
+        session.commit()
+
+        return render_template('studentArea.html')
+    else:
+        return redirect('/')
 
 # tengo o non tengo traccia delle prenotazioni dello studente relative all' esame?
 @app_studentExam.route('/unenrollExam', methods=['GET', 'POST'])

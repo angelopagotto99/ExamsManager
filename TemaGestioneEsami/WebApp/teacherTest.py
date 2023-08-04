@@ -75,7 +75,6 @@ def newTest():
                                          Exams.nTest,
                                          Exams.Faculty,
                                          Exams.CFU,
-                                         Exams.Enrollments,
                                          Exams.IdTeacher,
                                          func.count(Tests.Id).label('NumTestCreati')) \
                     .outerjoin(Tests, Tests.IdExam == Exams.Id) \
@@ -86,7 +85,6 @@ def newTest():
                               Exams.nTest,
                               Exams.Faculty,
                               Exams.CFU,
-                              Exams.Enrollments,
                               Exams.IdTeacher)
 
 
@@ -110,6 +108,7 @@ def newAppeal():
     IdExamForm = int(request.form["IdExam"])
     IdTestForm = int(request.form["IdTest"])
     DateForm = request.form["data"]  # si decide la data del proprio test di quell'esame
+    DateExForm = request.form["dataEx"]
     # dateFormCast = datetime.strptime(DateForm, '%d/%m/%Y').date()
 
     if current_user.is_authenticated:
@@ -124,12 +123,11 @@ def newAppeal():
                     and_(Tests.IdExam == IdExamForm)).first()
                 AllExams = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.Faculty,
                                          Exams.CFU,
-                                         Exams.Enrollments,
                                          Exams.IdTeacher).filter(Exams.IdTeacher == current_user.id)
-                newExamAppeal = Appeals(ExamData=DateForm, IdTest=idTests.Id)
+                newExamAppeal = Appeals(ExamData=DateForm, IdTest=idTests.Id, ValutationExpireData=DateExForm)
                 session.add(newExamAppeal)
                 session.commit()
-                AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest).filter(
+                AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest,Appeals.ValutationExpireData).filter(
                     Appeals.IdTest == idTests.Id)
                 tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
                 return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=checkUsedDate,
@@ -240,10 +238,8 @@ def ReUpdateCurrentTest():
         NameForm = request.form["name"]
         TipoForm = request.form["type"]
         ValForm = request.form["value"]
-        DataForm= request.form["date"]
 
         session.query(Tests).filter(and_(Tests.Id == IdTestForm, Tests.IdExam == IdExamForm)).update({Tests.TestName: NameForm, Tests.Tipology: TipoForm, Tests.ValType: ValForm})
-        session.query(Appeals).filter(and_(Appeals.IdTest==IdTestForm)).update({Appeals.ExamData:DataForm})
 
         session.commit()
         return render_template('teacherArea.html')

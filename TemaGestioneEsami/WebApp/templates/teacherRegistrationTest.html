@@ -85,6 +85,7 @@
         <main class="form-signin">
           <form action='/newTest' method="POST">
             <input type="hidden" name="IdExam" value="{{ IdExam }}">
+
             <div class="mb-3">
               <label for="exampleInputEmail" class="form-label">Test Name <span class="text-danger">*</span></label>
               {% if error is not defined %}
