@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -25,7 +25,7 @@
     <meta name="theme-color" content="#7952b3">
 
 
-    <style>
+           <style>
 
     .bg {
       width: 100%;
@@ -66,10 +66,8 @@
 
 
     <!-- Custom styles for this template -->
-    <link href="pricing.css" rel="stylesheet">
+    <link href="grid.css" rel="stylesheet">
   </head>
-
-
 
   <body class="bg">
     {% if current_user.is_authenticated  %}
@@ -78,7 +76,9 @@
 
         <header>
           <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
-              <a class="me-3 py-2 text-dark text-decoration-none" href='/teacherArea'><span class="fs-4">EXAM_MANAGER</span></a>
+            <a href="teacherArea" class="d-flex align-items-center text-dark text-decoration-none">
+              <span class="fs-4">EXAM_MANAGER</span>
+            </a>
 
             <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
               <a class="me-3 py-2 text-dark text-decoration-none" href='/logout'>LOGOUT</a>
@@ -86,52 +86,51 @@
           </div>
 
           <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
-            <h2 class="display-4 fw-normal">I MIEI APPELLI </h2>
-            <p class="fs-5 text-muted">Qui viene mostrata una lista di tutti gli appelli creati per materia.</p>
+            <h2 class="display-4 fw-normal">APPELLI CREATI</h2>
+            <p class="fs-5 text-muted">Qui viene mostrata una lista degli appelli creati da te.<br>Clicca su Mostra studenti per vedere chi si è iscritto.</p>
           </div>
         </header>
 
         <main>
-
-          {% if exams.count != 0 %}
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col" class="w-60">Nome Esame</th>
-                    <th scope="col" class="w-15">Nome Test</th>
-                    <th scope="col" class="w-25">Tipo Valutatione</th>
-                    <th scope="col" class="w-25">Data Appello</th>
-                    <th scope="col" class="w-25">Numero di Iscritti</th>
-
-                </tr>
-              </thead>
-            <tbody>
-
-              {% for app,test, ex in all_appeals_data %}
-            <tr>
-              <th class="w-auto" scope="row"></th>
-              <td class="w-25">{{ ex.ExamName }} </td>
-
-               <td class="w-25">{{ test.TestName }} </td>
-                <td class="w-25">{{ test.ValType }} </td>
-              <td class="w-25">{{ app.ExamData }} </td>
-              <td class="w-25">
-                <a href='/showAllEnrolledStudents/{{ ex.Id }}'>{{ Iscritti }}</a>
-              </td>
-
-            {% endfor %}
-
-              </tbody>
-            </table>
+  {% if all_appeals_data %}
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Nome Esame</th>
+          <th scope="col">Nome Test</th>
+          <th scope="col">Tipo Valutatione</th>
+          <th scope="col">Data Appello</th>
+          <th scope="col">Numero di Iscritti</th>
+          <th scope="col">Azioni</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app, test, ex, num_students in all_appeals_data %}
+          <tr>
+            <td>{{ ex.ExamName }}</td>
+            <td>{{ test.TestName }}</td>
+            <td>{{ test.ValType }}</td>
+            <td>{{ app.ExamData }}</td>
+            <td>{{ num_students }}</td>
+            <td>
+              <form action='/showAllEnrolledStudents' method="POST" class="d-inline">
+                <input type="hidden" name="IdTest" value="{{ test.Id }}">
+                <input type="hidden" name="IdAppeal" value="{{ app.Id }}">
+                <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
           {% else %}
             <br>
             <div class="d-flex justify-content-center">
               <div class="alert alert-primary text-center" role="alert">
-                <h4>Whooops!</h4><h6>Sembra che non ci siano ancora studenti iscritti al tuo esame</h6>
+                <h4>Whooops!</h4><h6>Sembra che al momento non ci siano corsi a cui ti puoi iscrivere.<br>Attendi che i docenti rendano disponibili i loro corsi.</h6>
                 <br>
-                <a href='teacherShowMyExams.html' class="btn btn-primary">Torna indietro</a>
+                <a href='/teacherArea' class="btn btn-primary">TORNA INDIETRO</a>
               </div>
             </div>
           {% endif %}
@@ -146,7 +145,6 @@
     {% endif %}
 
   </body>
-
 
   <script src="/docs/5.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
 

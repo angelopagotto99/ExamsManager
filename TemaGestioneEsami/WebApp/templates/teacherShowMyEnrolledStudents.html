@@ -100,6 +100,7 @@
                   <th scope="col"></th>
                   <th scope="col" class="w-75">Studente</th>
                     <th scope="col" class="w-75">Matricola</th>
+                  <th scope="col" class="w-75">Azioni</th>
 
 
                 </tr>
@@ -111,6 +112,12 @@
                     <th class="w-auto" scope="row"></th>
                     <td class="w-50">{{ c.Surname }} {{ c.Name }}</td>
                     <td class="w-50">{{ c.Matricola }}</td>
+                    <td>
+                    <form action='/newValution' method="POST" class="d-inline">
+                          <input type="hidden" name="IdTest" value="{{ c.Id }}">
+                          <input type="hidden" name="IdAppeal" value="{{ c.Id }}">
+                          <button type="submit" class="btn btn-outline-dark">DAI VALUTAZIONE</button>
+                    </form>
                   </tr>
                 {% endfor %}
               </tbody>

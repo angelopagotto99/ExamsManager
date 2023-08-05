@@ -116,26 +116,6 @@
                     <td class="w-25">{{ c.ValType }}  </td>
 
                 <td>
-                  {% if myAppeal.IdTest not in myTest %}
-                  <form action='/registrationAppeal' method="POST" class="d-inline">
-                    <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
-                      <input type="hidden" name="IdTest" value="{{ c.Id }}">
-
-                        <button type="submit" class="btn btn-outline-dark">CREA APPELLO</button>
-                   </form>
-                  {% endif %}
-                   <form action='/updateCurrentTest' method="POST" class="d-inline">
-                    <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
-                      <input type="hidden" name="IdTest" value="{{ c.Id }}">
-                  <button type="submit" class="btn btn-outline-dark">MODIFICA</button>
-                   </form>
-
-
-                    <form action='/deleteCurrentTest' method="POST" class="d-inline">
-                    <input type="hidden" name="IdExam" value="{{ c.IdExam }}">
-                      <input type="hidden" name="IdTest" value="{{ c.Id }}">
-                      <button type="submit" class="btn btn-outline-danger">ELIMINA</button></form></td>
-
                   </tr>
 
             {% endfor %}

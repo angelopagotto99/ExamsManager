@@ -3,9 +3,14 @@
 
 # Gestione delle votazioni dello studente.
 # Funzionalità:
-# 	1. Aggiunta della votazione per lo studente(controllo del numero dei test per Esami, il tipo di voto(se Scritto si dà un voto da 18 a 31, INS altrimenti))
+# 	1. Aggiunta della votazione per lo studente
+#   1.1 Controlliamo il campo isIdoneo dell'esame: se false-> allora la valutazione finale dovrà essere tra 18 e 30+1, altrimenti IDONEO
+#   1.2 Controlliamo se lo studente ha sostenuto e passato tutte le prove previste dall'esame: se si allora si registra la valutazione per lo studente, altrimenti no
+#   1.3 Query per calcolare la media dei voti presi nei test e registrazione automatica del voto lato studente dopo aver passato tutti i test
+#   1.4 Il voto deve essere salvato nel libretto con un valore intero per gli esami che prevedono una valutazione in 30esimi
+
 # 	2. Mostra La Lista di tutti gli studenti con la loro valutazione
-# 	3. Modifica del voto
+# 	3. Modifica del voto lato docente
 
 import string
 import random
@@ -150,11 +155,12 @@ def registrationTest():
         return redirect('/')
 
 @app_teacherValutation.route('/registrationAppeal', methods=['GET', 'POST'])
-def registrationAppeal():
+def registrationValutationNotFinal():
     if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
         IdTestForm = int(request.form["IdTest"])
-        return render_template('teacherRegistrationAppeal.html', IdExam=IdExamForm, IdTest=IdTestForm)
+        IdAppealForm = int(request.form["IdAppeal"])
+        return render_template('teacherGiveValutation.html', IdExam=IdExamForm, IdTest=IdTestForm, IdAppeal=IdAppealForm)
     else:
         return redirect('/')
 

@@ -20,6 +20,7 @@ from teacherExam import app_teacherExam
 from teacherTest import app_teacherTest
 from teacherValutation import app_teacherValutation
 from studentExam import app_studentExam
+from studentAppeal import app_studentAppeal
 
 
 app = Flask(__name__)
@@ -38,7 +39,7 @@ app.register_blueprint(app_teacherExam)
 app.register_blueprint(app_teacherTest)
 app.register_blueprint(app_teacherValutation)
 app.register_blueprint(app_studentExam)
-
+app.register_blueprint(app_studentAppeal)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)

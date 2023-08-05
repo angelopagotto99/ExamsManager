@@ -40,6 +40,7 @@ Exams = Base.classes.Exams
 Tests = Base.classes.Tests
 EnrolledStudents = Base.classes.IsEnrolled
 Appeals = Base.classes.ExamAppeals
+Sustains = Base.classes.Sustains
 
 
 
@@ -124,7 +125,7 @@ def newAppeal():
                 AllExams = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.Faculty,
                                          Exams.CFU,
                                          Exams.IdTeacher).filter(Exams.IdTeacher == current_user.id)
-                newExamAppeal = Appeals(ExamData=DateForm, IdTest=idTests.Id, ValutationExpireData=DateExForm)
+                newExamAppeal = Appeals(ExamData=DateForm, IdTest=IdTestForm, ValutationExpireData=DateExForm)
                 session.add(newExamAppeal)
                 session.commit()
                 AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest,Appeals.ValutationExpireData).filter(
@@ -168,23 +169,37 @@ def showAllTeacherTests():
 @app_teacherTest.route('/showAllTeacherAppeal', methods=['GET', 'POST'])
 @login_required
 def showAllTeacherAppeal():
+    # tutti i corsi esistenti
+        if current_user.is_authenticated:
+
+            # Recupera tutti gli appelli dei test dei vari esami con il numero di iscritti per ciascun appello
+            idTests = session.query(Tests.Id).filter(
+                and_(Tests.IdExam == Exams.Id)).first()
+            all_appeals_data = session.query(Appeals, Tests, Exams,
+                                             func.count(Sustains.Id).label('NumEnrolledStudents')) \
+                .join(Tests, Appeals.IdTest == Tests.Id) \
+                .join(Exams, Tests.IdExam == Exams.Id) \
+                .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
+                .filter(Exams.IdTeacher == current_user.id) \
+                .group_by(Appeals.Id, Tests.Id, Exams.Id) \
+                .order_by(Exams.ExamName, Tests.TestName, Appeals.ExamData) \
+                .all()
+
+            return render_template('teacherShowMyAppeal.html', all_appeals_data=all_appeals_data)
+        else:
+            return redirect('/')
+@app_teacherTest.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
+@login_required
+def enrolledStudents():
     if current_user.is_authenticated:
+        IdAppealForm = int(request.form["IdAppeal"])
+        # Mostra tutti gli studenti iscritti ai relativi corsi
+        AllStudents = session.query(EnrolledStudents.IdStudent, Students.Surname, Students.Name, Students.Matricola,
+                                    Students.Email).filter(
+            and_(Sustains.IdStudent == Students.Id, Sustains.IdAppeal == IdAppealForm)).order_by(
+            Students.Email)
 
-        # Recupera tutti gli esami del docente corrente
-        exams = session.query(Exams).filter(Exams.IdTeacher == current_user.id).all()
-        tests = session.query(Tests).filter(Tests.IdExam.in_([exam.Id for exam in exams])).order_by(Tests.TestName)
-        # Recupera le date degli appelli per ciascun test
-        AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == Exams.Id)
-        # Recupera tutti gli appelli dei test dei vari esami
-        all_appeals = session.query(Appeals, Tests, Exams).join(Tests, Appeals.IdTest == Tests.Id).\
-            join(Exams,Tests.IdExam == Exams.Id).filter(Exams.IdTeacher == current_user.id).\
-            order_by(Tests.TestName, Appeals.ExamData).all()
-
-        num_enrolled_students = session.query(func.count(EnrolledStudents.Id)).filter(
-            EnrolledStudents.IdExam == Tests.IdExam).scalar()
-
-
-        return render_template('teacherShowMyAppeal.html', exams=AllExams, all_appeals_data=all_appeals,Iscritti=num_enrolled_students)
+        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents)
     else:
         return redirect('/')
 
