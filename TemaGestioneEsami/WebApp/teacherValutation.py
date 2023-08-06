@@ -45,6 +45,60 @@ Sustains = Base.classes.Sustains
 
 # ...
 
+@app_teacherValutation.route('/newValutation', methods=['GET', 'POST'])
+@login_required
+def newValutationPartial():
+    ValutationForm = float(request.form["valutation"])
+    IdStudentForm = int(request.form["IdStudent"])
+    # IdAppealForm = int(request.form["IdAppeal"])
+
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            # controllo sul titolo del corso
+            # Verifica se esiste già una riga con Valutation non NULL per lo studente e l'appello specificato
+            existing_valutation = session.query(Sustains).filter(
+                Sustains.IdStudent == IdStudentForm,
+                Sustains.IdAppeal == Appeals.Id
+            ).first()
+            myValutations = session.query(Sustains).filter(Sustains.IdStudent==IdStudentForm).all()
+
+            if existing_valutation.Valutation is None:  # controlla se titleForm è usata da qualche docente
+                # titleForm non è usata da nessun docente
+                session.query(Sustains).filter(and_(Sustains.IdStudent==IdStudentForm, Sustains.IdAppeal == Appeals.Id)).update({Sustains.Valutation:ValutationForm})
+                session.commit()  # conferma le modifiche
+                return render_template('teacherShowMyEnrolledStudents.html', IdStudent=IdStudentForm, Valutations=myValutations)
+            else:
+                return render_template('teacherGiveValutation.html', error="Valutazione già presente", IdStudent=IdStudentForm)
+        else:
+            return redirect('/newValutationPartial')
+    else:
+        return redirect('/')
+
+@app_teacherValutation.route('/newValutationFinal', methods=['GET', 'POST'])
+@login_required
+def newValutationFinal():
+    IdStudentForm = int(request.form["IdStudent"])
+    IdExamForm = int(request.form["IdExam"])
+
+
+    if current_user.is_authenticated:
+        if request.method == 'POST':
+            if current_user.Id == EnrolledStudents.IdStudent:
+                if Exams.isIdoneo == False:
+                    tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
+                    sustains = session.query(Sustains).filter(Sustains.IdStudent == IdStudentForm).order_by(Sustains.IdStudent)
+
+                    session.query(EnrolledStudents).filter(EnrolledStudents.IdStudent==IdStudentForm).update({EnrolledStudents.Valutation:"IDONEO"})
+
+                else:
+            else:
+                render_template('studentShowAllExam.html', error="studente non presente", IdStudent=IdStudentForm, IdExam=IdExamForm)
+
+        else:
+            return redirect('/newValutationPartial')
+    else:
+        return redirect('/')
+
 @app_teacherValutation.route('/showAllEnrolledStudents/<int:IdExam>', methods=['GET', 'POST'])
 @login_required
 def showAllEnrolledStudents(IdExam):
