@@ -75,6 +75,8 @@ def newValutationPartial():
     else:
         return redirect('/')
 
+
+'''
 @app_teacherValutation.route('/newValutationFinal', methods=['GET', 'POST'])
 @login_required
 def newValutationFinal():
@@ -99,7 +101,7 @@ def newValutationFinal():
             return redirect('/newValutationPartial')
     else:
         return redirect('/')
-
+'''
 
 @app_teacherValutation.route('/showAllEnrolledStudents/<int:IdExam>', methods=['GET', 'POST'])
 @login_required
