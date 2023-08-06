@@ -18,6 +18,8 @@ from sqlalchemy.orm import sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date
+from sqlalchemy import exists
+
 
 # mantiene il collegamento con l'app principale mainPage
 app_teacherExam = Blueprint('app_teacherExam', __name__)
@@ -39,6 +41,7 @@ Exams = Base.classes.Exams
 isEnrolled = Base.classes.IsEnrolled
 Test = Base.classes.Tests
 Appeals = Base.classes.ExamAppeals
+Sustains = Base.classes.Sustains
 
 
 
@@ -78,7 +81,7 @@ def newExam():
             else:
                 return render_template('teacherExamRegistration.html', error="titolo", title=ExamForm,
                                        Description=DescriptionForm,
-                                       nTest=nTestForm, Faculty=FacultyForm, CFU=CFUForm)
+                                       nTest=nTestForm, Faculty=FacultyForm, CFU=CFUForm, Valutation=ValTypeForm)
         else:
             return redirect('/newExam')
     else:
@@ -134,16 +137,33 @@ def showAllTeacherExam():
 def unenrollExam():
     if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
+        # Rimuovi gli studenti iscritti all'esame
+        is_enrolled_subquery = session.query(isEnrolled.IdStudent).filter(isEnrolled.IdExam == IdExamForm).subquery()
+        session.query(isEnrolled).filter(
+            exists().where(is_enrolled_subquery.c.IdStudent == isEnrolled.IdStudent)).delete(
+            synchronize_session='fetch')
 
-        # rimuovo l'occorrenza che identifica che lo studente segue quel corso
-        session.query(isEnrolled).filter(and_(isEnrolled.IdExam == IdExamForm)).delete()
-        session.query(Appeals).filter(Appeals.IdTest == Test.Id)
-        session.query(Test.Id).filter(Test.IdExam == IdExamForm)
-        session.query(Test).filter(and_(Test.IdExam == IdExamForm)).delete()
-        session.query(Exams).filter(and_(Exams.Id == IdExamForm)).delete()
+        # Recupera tutti i test correlati all'esame
+        tests = session.query(Test).filter(Test.IdExam == IdExamForm).all()
+
+        for test in tests:
+            # Rimuovi gli appelli correlati al test
+            appeals_subquery = session.query(Appeals.Id).filter(Appeals.IdTest == test.Id).subquery()
+            session.query(Sustains).filter(exists().where(Sustains.IdAppeal == appeals_subquery.c.Id)).delete(
+                synchronize_session='fetch')
+
+            # Rimuovi le valutazioni degli studenti negli appelli del test
+            session.query(Appeals).filter(Appeals.IdTest == test.Id).delete(synchronize_session='fetch')
+
+        # Rimuovi i test correlati all'esame
+        session.query(Test).filter(Test.IdExam == IdExamForm).delete()
+
+        # Rimuovi l'esame
+        session.query(Exams).filter(Exams.Id == IdExamForm).delete()
+
         session.commit()
+        return redirect('/teacherArea')
 
-        return render_template('teacherArea.html')
     else:
         return redirect('/')
 

@@ -40,6 +40,7 @@ Exams = Base.classes.Exams
 isEnrolled = Base.classes.IsEnrolled
 Test = Base.classes.Tests
 Appeals = Base.classes.ExamAppeals
+Sustains = Base.classes.Sustains
 
 @app_studentExam.route('/showAllCourses')
 @login_required
@@ -74,7 +75,16 @@ def showAllExamTest():
 
         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
         tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
-
+        student_valutations = session.query(Sustains).join(
+            Appeals, Sustains.IdAppeal == Appeals.Id
+        ).join(
+            isEnrolled, and_(
+                Sustains.IdStudent == isEnrolled.IdStudent,
+                Sustains.IdAppeal == isEnrolled.IdExam
+            )
+        ).filter(
+            isEnrolled.IdStudent == current_user.Id
+        ).all()
         # Recupera tutti gli id dei test associati all'esame
         test_ids = [test.Id for test in tests]
         AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)

@@ -154,6 +154,7 @@ def showAllTeacherTests():
 
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
 
+
         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
 
@@ -194,12 +195,11 @@ def enrolledStudents():
     if current_user.is_authenticated:
         IdAppealForm = int(request.form["IdAppeal"])
         # Mostra tutti gli studenti iscritti ai relativi corsi
-        AllStudents = session.query(EnrolledStudents.IdStudent, Students.Surname, Students.Name, Students.Matricola,
-                                    Students.Email).filter(
-            and_(Sustains.IdStudent == Students.Id, Sustains.IdAppeal == IdAppealForm)).order_by(
-            Students.Email)
+        AllStudents = session.query(Students).join(Sustains, Students.Id == Sustains.IdStudent).filter(Sustains.IdAppeal == IdAppealForm).all()
+        myValutations = session.query(Sustains).filter(Sustains.IdAppeal == IdAppealForm, Sustains.IdStudent == Students.Id).all()
 
-        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents)
+
+        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents, IdAppeal=IdAppealForm, Valutations=myValutations)
     else:
         return redirect('/')
 
@@ -217,7 +217,7 @@ def deleteCurrentTest():
         tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
         dates = session.query(Appeals).filter(Appeals.IdTest == IdTestForm).order_by(Appeals.ExamData)
         session.query(Appeals).filter(and_(Appeals.IdTest == IdTestForm)).delete()
-        session.query(Tests).filter(and_(Tests.IdExam == IdExamForm, Tests.Id==IdTestForm)).delete()
+        session.query(Tests).filter(and_(Tests.IdExam == IdExamForm, Tests.Id == IdTestForm)).delete()
 
         session.commit()
         AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == IdExamForm)
@@ -276,6 +276,15 @@ def registrationAppeal():
         IdExamForm = int(request.form["IdExam"])
         IdTestForm = int(request.form["IdTest"])
         return render_template('teacherRegistrationAppeal.html', IdExam=IdExamForm, IdTest=IdTestForm)
+    else:
+        return redirect('/')
+
+@app_teacherTest.route('/registrationValutation', methods=['GET', 'POST'])
+def registrationValutationNotFinal():
+    if current_user.is_authenticated:
+        IdStudentForm = int(request.form["IdStudent"])
+        IdAppealForm = int(request.form["IdAppeal"])
+        return render_template('teacherGiveValutation.html', IdAppeal=IdAppealForm, IdStudent=IdStudentForm)
     else:
         return redirect('/')
 
