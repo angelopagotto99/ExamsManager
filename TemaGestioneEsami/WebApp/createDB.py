@@ -33,7 +33,7 @@ class Sustains(Base):
     Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.Id'))
-    Valutation = Column(Float, nullable=True)
+    Valutation = Column(Float, nullable=False)
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),)
 
@@ -47,7 +47,7 @@ class IsEnrolled(Base):
     __tablename__ = 'IsEnrolled'
 
     # dichiarazione dei campi della tabella
-    Id = Column(Integer, primary_key=True, autoincrement=True)
+    Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdExam = Column(Integer, ForeignKey('Exams.Id'))
     Valutation = Column(String, nullable=True)
@@ -60,20 +60,18 @@ class IsEnrolled(Base):
     Student = relationship('Students', back_populates="Exams")
 
 
-
-
-
 class Students(Base):
     __tablename__ = 'Students'
 
     # dichiarazione dei campi della tabella
+
     Id = Column(Integer, primary_key=True)
     Email = Column(String, nullable=False)
     Matricola = Column(String(6), nullable=False, unique=True)
     Pwd = Column(String, nullable=False)
     Name = Column(String(30), nullable=False)
     Surname = Column(String(30), nullable=False)
-    Telephone = Column(String(30), nullable=False)
+    Telephone = Column(Integer, nullable=False)
     Faculty = Column(String(30), nullable=False)
 
     # relazione con prove n a m
@@ -88,13 +86,12 @@ class Exams(Base):
     # dichiarazione dei campi della tabella
 
     Id = Column(Integer, primary_key=True)
-    ExamName = Column(String, nullable=False)
+    ExamName = Column(String(30), nullable=False)
     Description = Column(String(100), nullable=False)
     nTest = Column(Integer, nullable=False)
     IdTeacher = Column(Integer, ForeignKey('Teachers.Id'))
     Faculty = Column(String(30), nullable=False)
     CFU = Column(Integer, nullable=False)
-    isIdoneo = Column(Boolean, nullable=False)
 
     Teacher = relationship('Teachers', back_populates="Exams")
     Tests = relationship('Tests', back_populates="Exam")
@@ -107,7 +104,7 @@ class Tests(Base):
     # dichiarazione dei campi della tabella
 
     Id = Column(Integer, primary_key=True)
-    TestName = Column(String, nullable=False)
+    TestName = Column(String(30), nullable=False)
     Tipology = Column(String(30), nullable=False)
     ValType = Column(Enum('Esame', 'Idoneità', 'Bonus', name='modalità'), nullable=False)
 

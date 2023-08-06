@@ -40,7 +40,6 @@ Exams = Base.classes.Exams
 isEnrolled = Base.classes.IsEnrolled
 Test = Base.classes.Tests
 Appeals = Base.classes.ExamAppeals
-Sustains = Base.classes.Sustains
 
 @app_studentExam.route('/showAllCourses')
 @login_required
@@ -75,22 +74,13 @@ def showAllExamTest():
 
         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
         tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
-        student_valutations = session.query(Sustains).join(
-            Appeals, Sustains.IdAppeal == Appeals.Id
-        ).join(
-            isEnrolled, and_(
-                Sustains.IdStudent == isEnrolled.IdStudent,
-                Sustains.IdAppeal == isEnrolled.IdExam
-            )
-        ).filter(
-            isEnrolled.IdStudent == current_user.Id
-        ).all()
+
         # Recupera tutti gli id dei test associati all'esame
         test_ids = [test.Id for test in tests]
         AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
         # Recupera le date degli appelli per ciascun test
         AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
-        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams,valutation=student_valutations)
+        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
     else:
         return redirect('/')
 
@@ -108,32 +98,51 @@ def showMyEnrolledExam():
 @login_required
 def enrollStudent():
     if current_user.is_authenticated:
-        IdExamForm = int(request.form["IdExam"])
-        today = date.today()
+        try:
+            IdExamForm = int(request.form["IdExam"])
 
-        newEnrollment = isEnrolled(IdStudent=current_user.id, IdExam=IdExamForm)
-        session.add(newEnrollment)
-        session.commit()
+            # Controlla se lo studente è già iscritto all'esame
+            existing_enrollment = session.query(isEnrolled).filter(
+                isEnrolled.IdExam == IdExamForm,
+                isEnrolled.IdStudent == current_user.id
+            ).first()
 
-        return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
+            if existing_enrollment:
+                return render_template('studentArea.html', message="Sei già iscritto a questo esame.")
+
+            newEnrollment = isEnrolled(IdStudent=current_user.id, IdExam=IdExamForm)
+            session.add(newEnrollment)
+            session.commit()
+
+            return render_template('studentArea.html')
+        except Exception as e:
+            print("Errore:", str(e))  # Tratta l'errore in modo appropriato
+            return redirect('/')
     else:
         return redirect('/')
 
 # tengo o non tengo traccia delle prenotazioni dello studente relative all' esame?
 @app_studentExam.route('/unenrollExam', methods=['GET', 'POST'])
+@login_required
 def unenrollExam():
     if current_user.is_authenticated:
-        IdExamForm = int(request.form["IdExam"])
+        try:
+            IdExamForm = int(request.form["IdExam"])
 
-        # rimuovo l'occorrenza che identifica che lo studente segue quel corso
-        session.query(isEnrolled).filter(and_(isEnrolled.IdExam == IdExamForm)).delete()
-        session.query(Appeals).filter(Appeals.IdTest == Test.Id)
-        session.query(Test.Id).filter(Test.IdExam == IdExamForm)
-        session.query(Test).filter(and_(Test.IdExam == IdExamForm)).delete()
-        session.query(Exams).filter(and_(Exams.Id == IdExamForm)).delete()
-        session.commit()
+            # Rimuovi l'iscrizione dello studente
+            existing_enrollment = session.query(isEnrolled).filter(
+                isEnrolled.IdExam == IdExamForm,
+                isEnrolled.IdStudent == current_user.id
+            ).first()
 
-        return render_template('teacherArea.html')
+            if existing_enrollment:
+                session.delete(existing_enrollment)  # Rimuove l'iscrizione esistente
+                session.commit()
+
+            return render_template('studentArea.html')
+        except Exception as e:
+            print("Errore:", str(e))  # Tratta l'errore in modo appropriato
+            return redirect('/')
     else:
         return redirect('/')
 

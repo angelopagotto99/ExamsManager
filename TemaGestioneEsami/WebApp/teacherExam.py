@@ -21,6 +21,8 @@ from datetime import date
 from sqlalchemy import exists
 
 
+
+
 # mantiene il collegamento con l'app principale mainPage
 app_teacherExam = Blueprint('app_teacherExam', __name__)
 

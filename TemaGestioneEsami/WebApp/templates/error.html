@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-icon {
+            font-size: 48px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .go-back-link {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .go-back-link:hover {
+            background-color: #3498db;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">&#9888;</div>
+        <h1>Error</h1>
+        <p class="error-message">{{ message }}</p>
+        <a class="go-back-link" href="/">Go back</a>
+    </div>
+</body>
+</html>
