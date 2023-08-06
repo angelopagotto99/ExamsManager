@@ -4,7 +4,7 @@
 # E' la pagina principale dove è presente l'applicazione flask.
 # Questa pagina si occupa di:
 # 	1. Mantenere la connessione con le altre pagine tramite la parte di blueprint di flask
-# 	2. Gestire il login e la registrazione.
+# 	2. Gestire il login e la registrazione.v
 
 import bcrypt
 from sqlalchemy import *

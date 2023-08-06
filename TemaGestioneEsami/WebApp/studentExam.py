@@ -7,7 +7,7 @@
 # 	2. Mostrare gli esami aggiunti
 # 	3. Cancellazione di un esame
 #   4. Mostrare i voti di ciascun esame sostenuto
-#   5. Mostrare quanti e quali studenti partecipano all' esame del giorno
+#   5. Mostrare quanti e quali studenti partecipano all' esame del giornoc
 
 
 from sqlalchemy import *

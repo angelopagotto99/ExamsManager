@@ -7,7 +7,7 @@
 # 	1. Aggiunta delle lezioni al corso
 # 	2. Distinzione fra lezione online e in presenza(FTF)
 # 	3. Cancellazione di una lezione
-#   4. Modifica di una lezione
+#   4. Modifica di una lezionec
 
 # Importazione delle librerie
 import string

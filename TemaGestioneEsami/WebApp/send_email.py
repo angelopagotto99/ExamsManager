@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 import os
 from dotenv import load_dotenv
 
-# Carica le variabili d'ambiente dal file .env
+# Carica le variabili d'ambiente dal file .envc
 load_dotenv()
 
 def generate_random_number():

@@ -4,7 +4,7 @@
 # Gestione delle votazioni dello studente.
 # Funzionalità:
 # 	1. Aggiunta della votazione per lo studente(controllo del numero dei test per Esami, il tipo di voto(se Scritto si dà un voto da 18 a 31, INS altrimenti))
-# 	2. Mostra La Lista di tutti gli studenti con la loro valutazione
+# 	2. Mostra La Lista di tutti gli studenti con la loro valutazionec
 # 	3. Modifica del voto
 
 import string

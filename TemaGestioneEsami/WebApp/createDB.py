@@ -10,7 +10,7 @@ Base = declarative_base()
 class Teachers(Base):
     __tablename__ = 'Teachers'
 
-    # dichiarazione dei campi della tabella
+    # dichiarazione dei campi della tabellav
 
     Id = Column(Integer, primary_key=True)
     Email = Column(String(30), nullable=False, unique=True)
