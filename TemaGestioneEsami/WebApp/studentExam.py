@@ -90,7 +90,7 @@ def showAllExamTest():
         AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
         # Recupera le date degli appelli per ciascun test
         AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
-        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
+        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams,valutation=student_valutations)
     else:
         return redirect('/')
 
