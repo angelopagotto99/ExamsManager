@@ -79,7 +79,7 @@ def enrollStudentAppeal():
         IdAppealForm = int(request.form["IdAppeal"])
         today = date.today()
 
-        newEnrollment = Sustains(IdStudent=current_user.id, IdAppeal=IdAppealForm)
+        newEnrollment = Sustains(IdStudent=current_user.id, IdAppeal=IdAppealForm,isValid=True)
         session.add(newEnrollment)
         session.commit()
 

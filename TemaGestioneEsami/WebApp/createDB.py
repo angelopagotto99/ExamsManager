@@ -34,6 +34,8 @@ class Sustains(Base):
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.Id'))
     Valutation = Column(Float, nullable=False)
+    isValid = Column(Boolean, nullable=True)
+
 
     __table_args__ = (UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),)
 

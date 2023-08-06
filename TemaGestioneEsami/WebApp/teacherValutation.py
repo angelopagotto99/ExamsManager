@@ -24,7 +24,7 @@ from flask import Flask, flash, redirect, render_template, request, url_for
 app_teacherValutation = Blueprint('app_teacherValutation', __name__)
 
 # creazione dell'engine - inserisci le credenziali in modo sicuro
-engine = create_engine('postgresql+pg8000://username:Angelo99@localhost:5432/Exams_Manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)
@@ -74,6 +74,7 @@ def newValutationPartial():
     else:
         return redirect('/')
 
+'''
 @app_teacherValutation.route('/newValutationFinal', methods=['GET', 'POST'])
 @login_required
 def newValutationFinal():
@@ -98,6 +99,7 @@ def newValutationFinal():
             return redirect('/newValutationPartial')
     else:
         return redirect('/')
+'''
 
 @app_teacherValutation.route('/showAllEnrolledStudents/<int:IdExam>', methods=['GET', 'POST'])
 @login_required
