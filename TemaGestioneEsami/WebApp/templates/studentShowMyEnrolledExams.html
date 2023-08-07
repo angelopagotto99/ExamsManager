@@ -112,7 +112,17 @@
                     <th class="w-auto" scope="row"></th>
                     <td class="w-25">{{ c.ExamName }}</td>
                     <td class="w-50">{{ c.nTest }}</td>
-                    {% for s in  %}
+                    <td class="w-50">
+                    {% for s in myVal %}
+                      {% if s.IdExam == c.Id %}
+                          {% if s.Valutation is none %}
+                          NON PASSATO
+                          {% else %}
+                            PASSATO CON {{ s.Valutation }}
+                        {% endif %}
+                      {% endif %}
+                      {% endfor %}
+                    </td>
                     <td class="w-50">{{ c.CFU }}</td>
                     <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
                       <span class="col-md-auto display-inlineblock">

@@ -46,32 +46,28 @@ Sustains = Base.classes.Sustains
 @login_required
 def showAllAppeals():
     if current_user.is_authenticated:
-        # tutti gli appelli esistenti
-        allAppeal = session.query(Appeals.Id, Appeals.ExamData, Appeals.ValutationExpireData, Appeals.IdTest)
-        # gli  appelli a cui sono già iscritto
-        myAppeal = session.query(Sustains.IdAppeal).filter(current_user.id == Sustains.IdStudent)
-        # lista degli appelli a cui posso iscrivermi
-        displayAppeals = session.query(Appeals.Id, Exams.ExamName, Tests.TestName,
-                                       Exams.Faculty, Exams.IdTeacher,
-                                       Appeals.IdTest).filter(Appeals.Id.notin_(myAppeal))
+        # Gli appelli a cui sono già iscritto
+        myAppeal_ids = session.query(Sustains.IdAppeal).filter(current_user.id == Sustains.IdStudent)
 
-        # numero d'iscrizioni fatte per ciascun corso
+        # Lista di tutti gli appelli disponibili (esclusi quelli a cui sono già iscritto)
+        availableAppeals = session.query(Appeals.Id, Exams.ExamName, Tests.TestName,
+                                         Exams.Faculty, Exams.IdTeacher,
+                                         Appeals.IdTest).filter(Appeals.Id.notin_(myAppeal_ids))
+
+        # Numero di iscrizioni fatte per ciascun corso
         nEnrollmentsGroup = \
             session.query(func.count(Sustains.Id), Sustains.IdAppeal) \
-                .join(Appeals) \
                 .group_by(Sustains.IdAppeal)
-        enrolledCoursesId = session.query(Sustains.IdAppeal).distinct(Sustains.IdAppeal)
-        neverEnrolledCourses = session.query(Appeals.Id).filter(
-            Appeals.Id.notin_(enrolledCoursesId))
 
-        # informazioni riguardo i docenti
+        # Informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
 
-        return render_template('studentShowAllAppeal.html', courses=displayAppeals, teachersInfo=teachersInfo,
-                               allCourses=allAppeal, nEnrollmentsGroup=nEnrollmentsGroup,
-                               neverEnrolledCourses=neverEnrolledCourses)
+        return render_template('studentShowAllAppeal.html', courses=availableAppeals, teachersInfo=teachersInfo,
+                               nEnrollmentsGroup=nEnrollmentsGroup)
     else:
         return redirect('/')
+
+
 
 @app_studentAppeal.route('/showMyEnrolledExam')
 @login_required

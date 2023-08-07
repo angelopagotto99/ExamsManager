@@ -104,7 +104,7 @@ def showAllExamTest():
         student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
 
         return render_template('studentShowAllExamTests.html', myTest=myTest, myAppeal=myAppeal,
-                               exam=testInfo, myVal=student_valutations, student_test_grades=student_test_grades)
+                               exam=testInfo, myVal=student_valutations, student_test_grades=student_test_grades, IdExam=IdExamForm)
     else:
         return redirect('/')
 
@@ -114,7 +114,10 @@ def showMyEnrolledExam():
     if current_user.is_authenticated:
         myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
         coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
-        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo)
+        myVal = session.query(isEnrolled).filter(current_user.id == isEnrolled.IdStudent)
+
+
+        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo, myVal=myVal)
     else:
         return redirect('/')
 
@@ -131,7 +134,7 @@ def enrollStudent():
             ).first()
 
             if existing_enrollment:
-                return render_template('studentArea.html', message="Sei già iscritto a questo esame.",name=current_user.name,surname=current_user.surname)
+                return render_template('studentArea.html', message="Sei già iscritto a questo esame.", name=current_user.name,surname=current_user.surname)
 
             newEnrollment = isEnrolled(IdStudent=current_user.id, IdExam=IdExamForm)
             session.add(newEnrollment)

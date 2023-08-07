@@ -23,6 +23,7 @@ from studentExam import app_studentExam
 from studentAppeal import app_studentAppeal
 
 
+
 app = Flask(__name__)
 
 login_manager = LoginManager()
@@ -50,6 +51,7 @@ Base.prepare(engine, reflect=True)
 # importa i dati della tabella del database
 Students = Base.classes.Students
 Teachers = Base.classes.Teachers
+
 
 
 # definisce la struttura degli utenti del sistema

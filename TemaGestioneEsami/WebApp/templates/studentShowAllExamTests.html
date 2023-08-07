@@ -121,9 +121,13 @@
                   </tr>
 
             {% endfor %}
+
               </tbody>
             </table>
-
+          <form action='/newValutationFinal' method="POST" class="d-inline">
+                <input type="hidden" id="Id"name="IdExam" value="{{ IdExam }}">
+                <button type="submit" class="btn btn-outline-dark">VOTO FINALE</button>
+              </form>
           {% else %}
             <br>
             <div class="d-flex justify-content-center">

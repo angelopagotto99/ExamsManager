@@ -276,8 +276,6 @@ def registrationValutationNotFinal():
     if current_user.is_authenticated:
         IdAppealForm = int(request.form["IdAppeal"])
         IdStudentForm = int(request.form["IdStudent"])
-        print("IdAppealForm:", IdAppealForm)
-        print("IdStudentForm:", IdStudentForm)
 
         return render_template('teacherGiveValutation.html', IdAppeal=IdAppealForm, IdStudent=IdStudentForm)
     else:
