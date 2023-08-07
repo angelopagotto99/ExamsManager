@@ -18,7 +18,7 @@ from sqlalchemy.orm import sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date
-from sqlalchemy.orm import joinedload
+
 
 # mantiene il collegamento con l'app principale mainPage
 app_studentExam = Blueprint('app_studentExam', __name__)
@@ -40,6 +40,7 @@ Exams = Base.classes.Exams
 isEnrolled = Base.classes.IsEnrolled
 Test = Base.classes.Tests
 Appeals = Base.classes.ExamAppeals
+Sustains = Base.classes.Sustains
 
 @app_studentExam.route('/showAllCourses')
 @login_required
@@ -54,33 +55,56 @@ def showAllCourses():
         displayCourses = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.CFU, Exams.Faculty,
                                        Exams.IdTeacher).filter(Exams.Id.notin_(myCourses))
 
+        # numero d'iscrizioni fatte per ciascun corso
+        nEnrollmentsGroup = \
+            session.query(func.count(isEnrolled.Id), isEnrolled.IdExam) \
+                .join(Exams) \
+                .group_by(isEnrolled.IdExam)
+        enrolledCoursesId = session.query(isEnrolled.IdExam).distinct(isEnrolled.IdExam)
+        neverEnrolledCourses = session.query(Exams.Id).filter(
+            Exams.Id.notin_(enrolledCoursesId))
 
         # informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
 
         return render_template('studentShowAllExam.html', courses=displayCourses, teachersInfo=teachersInfo,
-                               myCourses=allCourses)
+                               allCourses=allCourses, nEnrollmentsGroup=nEnrollmentsGroup,
+                               neverEnrolledCourses=neverEnrolledCourses)
     else:
         return redirect('/')
 
 @app_studentExam.route('/showAllExamTest', methods=['GET', 'POST'])
 def showAllExamTest():
     if current_user.is_authenticated:
-        # Mostra tutti test dell'esame del docente corrente
+        # Mostra tutti i test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 
+        # Query per recuperare tutti i test associati all'esame
+        myTest = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName).all()
 
-        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+        # Recupera tutti gli ID dei test associati all'esame
+        test_ids = [test.Id for test in myTest]
 
-        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
-        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
 
-        # Recupera tutti gli id dei test associati all'esame
-        test_ids = [test.Id for test in tests]
-        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
-        # Recupera le date degli appelli per ciascun test
-        AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
-        return render_template('studentShowAllExamTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
+        # Query per recuperare le informazioni sugli appelli associati ai test
+        myAppeal = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids)).all()
+
+        # Recupera tutti gli ID degli appelli associati ai test
+        appeal_ids = [appeal.Id for appeal in myAppeal]
+
+        # Query per recuperare le informazioni sugli esami associati all'esame
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm).first()
+
+        # Query per recuperare le valutazioni dello studente per i test
+        student_valutations = session.query(Sustains).filter(
+            and_(Sustains.IdStudent == current_user.id, Sustains.IdAppeal.in_(appeal_ids))
+        ).all()
+
+        # Creare un dizionario per memorizzare le valutazioni dei test dello studente
+        student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
+
+        return render_template('studentShowAllExamTests.html', myTest=myTest, myAppeal=myAppeal,
+                               exam=testInfo, myVal=student_valutations, student_test_grades=student_test_grades)
     else:
         return redirect('/')
 
@@ -98,7 +122,6 @@ def showMyEnrolledExam():
 @login_required
 def enrollStudent():
     if current_user.is_authenticated:
-        try:
             IdExamForm = int(request.form["IdExam"])
 
             # Controlla se lo studente è già iscritto all'esame
@@ -108,16 +131,13 @@ def enrollStudent():
             ).first()
 
             if existing_enrollment:
-                return render_template('studentArea.html', message="Sei già iscritto a questo esame.")
+                return render_template('studentArea.html', message="Sei già iscritto a questo esame.",name=current_user.name,surname=current_user.surname)
 
             newEnrollment = isEnrolled(IdStudent=current_user.id, IdExam=IdExamForm)
             session.add(newEnrollment)
             session.commit()
 
-            return render_template('studentArea.html')
-        except Exception as e:
-            print("Errore:", str(e))  # Tratta l'errore in modo appropriato
-            return redirect('/')
+            return render_template('studentArea.html',name=current_user.name, surname=current_user.surname)
     else:
         return redirect('/')
 
@@ -139,7 +159,7 @@ def unenrollExam():
                 session.delete(existing_enrollment)  # Rimuove l'iscrizione esistente
                 session.commit()
 
-            return render_template('studentArea.html')
+            return render_template('studentArea.html',name=current_user.name,surname=current_user.surname)
         except Exception as e:
             print("Errore:", str(e))  # Tratta l'errore in modo appropriato
             return redirect('/')
@@ -153,18 +173,36 @@ def showTeacherTests():
         # Mostra tutti test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 
-
-        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
-
-        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
-        tests = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
+        # tutti i test di quell'esame
+        myTest = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName)
 
         # Recupera tutti gli id dei test associati all'esame
-        test_ids = [test.Id for test in tests]
-        AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
-        # Recupera le date degli appelli per ciascun test
-        AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
-        return render_template('teacherShowMyTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
+        test_ids = [test.Id for test in myTest]
+
+        # Query per recuperare le informazioni sugli appelli associati ai test
+        myAppeal = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids))
+
+        # Query per recuperare le informazioni sugli esami associati ai test
+        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+
+        # Query per recuperare le valutazioni dello studente per i test
+        student_valutations = session.query(Sustains).filter(
+            Sustains.IdStudent == current_user.Id,
+            Sustains.IdAppeal.in_([appeal.Id for appeal in myAppeal])
+        ).all()
+
+        # query per sus
+
+        # recuperare i voti ottenuti dallo studente nei test dell'esame
+        student_test_grades = {}
+        for test in myTest:
+            for valutation in student_valutations:
+                if valutation.IdAppeal == test.AppealId:
+                    student_test_grades[test.Id] = valutation.Valutation
+
+        return render_template('teacherShowMyTests.html', myTest=myTest, myAppeal=myAppeal,
+                               test=myTest, exam=testInfo,
+                               myVal=student_valutations, student_test_grades=student_test_grades)
     else:
         return redirect('/')
 

@@ -84,14 +84,13 @@
         <main class="form-signin">
             <form action='/newValutation' method="POST">
             <input type="hidden" name="IdStudent" value="{{ IdStudent }}">
-              <input type="hidden" name="IdTest" value="{{ IdTest }}">
                 <input type="hidden" name="IdAppeal" value="{{ IdAppeal }}">
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">Valutation <span class="text-danger">*</span></label>
                 {% if error is not defined %}
-                <input name="valutation" type="text" class="form-control" required>
+                <input name="valutation" type="number" step="1.00" class="form-control" required>
               {% else %}
-                <input name="valutation" type="text" class="form-control" required>
+                <input name="valutation" type="number" step="1.00" class="form-control" required>
               {% endif %}
             </div>
 

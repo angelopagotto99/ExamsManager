@@ -18,8 +18,9 @@ from sqlalchemy.orm import relationship, sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request, app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date, datetime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.automap import automap_base
 
-from TemaGestioneEsami.WebApp.teacherValutation import EnrolledStudents, Appeals
 
 # Definizione dell'app Flask
 app_teacherTest = Blueprint('app_teacherTest', __name__)
@@ -27,29 +28,20 @@ app_teacherTest = Blueprint('app_teacherTest', __name__)
 # Creazione dell'engine e della sessione per il database
 engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
 Session = sessionmaker(bind=engine)
+
 session = Session()
+Base = automap_base()
 
-Base = declarative_base()
-Base.metadata.reflect(engine)
+Base.prepare(engine, reflect=True)
 
-# Definizione delle classi per le tabelle del database
-class Students(Base):
-    __table__ = Base.metadata.tables['Students']
 
-class Teachers(Base):
-    __table__ = Base.metadata.tables['Teachers']
-
-class Exams(Base):
-    __table__ = Base.metadata.tables['Exams']
-
-class Tests(Base):
-    __table__ = Base.metadata.tables['Tests']
-
-class IsEnrolled(Base):
-    __table__ = Base.metadata.tables['IsEnrolled']
-
-class ExamAppeals(Base):
-    __table__ = Base.metadata.tables['ExamAppeals']
+# importa i dati delle tabelle del database
+Students = Base.classes.Students
+Teachers = Base.classes.Teachers
+Exams = Base.classes.Exams
+Tests = Base.classes.Tests
+Appeals = Base.classes.ExamAppeals
+Sustains = Base.classes.Sustains
 
 # Definizione delle route
 
@@ -58,25 +50,19 @@ class ExamAppeals(Base):
 def newTest():
     if current_user.is_authenticated:
         if request.method == 'POST':
-            try:
                 IdExamForm = int(request.form["IdExam"])
                 NameForm = request.form["name"]
                 TipoForm = request.form["type"]
                 ValForm = request.form["value"]
 
-                if not (NameForm and TipoForm and ValForm):
-                    return render_template('error.html', message="Campi obbligatori mancanti.")
 
                 existing_test = session.query(Tests).filter(and_(
                     Tests.TestName == NameForm,
                     Tests.Id == IdExamForm
                 )).first()
 
-                if existing_test:
-                    return render_template('error.html', message="Nome del test già utilizzato.")
 
-                new_test = Tests(
-                    TestName=NameForm,
+                new_test = Tests(TestName=NameForm,
                     Tipology=TipoForm,
                     ValType=ValForm,
                     IdExam=IdExamForm,
@@ -111,11 +97,8 @@ def newTest():
                               Exams.CFU,
                               Exams.IdTeacher)
 
-                return render_template('teacherShowMyExams.html', IdTest=idTests, checkUsedName=None, IdExam=IdExamForm, myCourses=AllExams)
+                return render_template('teacherShowMyExams.html', IdTest=idTests, IdExam=IdExamForm, myCourses=AllExams)
 
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
         else:
             return redirect('/newTest')
     else:
@@ -128,7 +111,6 @@ def newTest():
 def newAppeal():
     if current_user.is_authenticated:
         if request.method == 'POST':
-            try:
                 IdExamForm = int(request.form["IdExam"])
                 IdTestForm = int(request.form["IdTest"])
                 DateForm = request.form["data"]
@@ -164,11 +146,8 @@ def newAppeal():
 
                 tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
 
-                return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=None, IdExam=IdExamForm, myCourses=AllExams, myAppeal=AllAppealData, myTest=tests)
+                return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=checkUsedDate, IdExam=IdExamForm, myCourses=AllExams, myAppeal=AllAppealData, myTest=tests)
 
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
         else:
             return redirect('/newAppeal')
     else:
@@ -178,34 +157,28 @@ def newAppeal():
 @login_required
 def showAllTeacherAppeal():
     if current_user.is_authenticated:
-        try:
-            session = Session()
 
-            exams = session.query(Exams).filter(Exams.IdTeacher == current_user.id).all()
-            tests = session.query(Tests).filter(Tests.IdExam.in_([exam.Id for exam in exams])).order_by(Tests.TestName)
+            # Recupera tutti gli appelli dei test dei vari esami con il numero di iscritti per ciascun appello
+            idTests = session.query(Tests.Id).filter(
+                and_(Tests.IdExam == Exams.Id)).first()
+            all_appeals_data = session.query(Appeals, Tests, Exams,
+                                             func.count(Sustains.Id).label('NumEnrolledStudents')) \
+                .join(Tests, Appeals.IdTest == Tests.Id) \
+                .join(Exams, Tests.IdExam == Exams.Id) \
+                .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
+                .filter(Exams.IdTeacher == current_user.id) \
+                .group_by(Appeals.Id, Tests.Id, Exams.Id) \
+                .order_by(Exams.ExamName, Tests.TestName, Appeals.ExamData) \
+                .all()
 
-            AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == Exams.Id)
-
-            all_appeals = session.query(Appeals, Tests, Exams).join(Tests, Appeals.IdTest == Tests.Id).\
-                join(Exams, Tests.IdExam == Exams.Id).filter(Exams.IdTeacher == current_user.id).\
-                order_by(Tests.TestName, Appeals.ExamData).all()
-
-            num_enrolled_students = session.query(func.count(EnrolledStudents.Id)).filter(
-                EnrolledStudents.IdExam == Tests.IdExam).scalar()
-
-            return render_template('teacherShowMyAppeal.html', exams=AllExams, all_appeals_data=all_appeals, Iscritti=num_enrolled_students)
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
+            return render_template('teacherShowMyAppeal.html', all_appeals_data=all_appeals_data)
     else:
-        return redirect('/')
+            return redirect('/')
 
 @app_teacherTest.route('/deleteCurrentTest', methods=['POST'])
 @login_required
 def deleteCurrentTest():
     if current_user.is_authenticated:
-        try:
             IdExamForm = int(request.form["IdExam"])
             IdTestForm = int(request.form["IdTest"])
 
@@ -222,10 +195,6 @@ def deleteCurrentTest():
             AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == IdExamForm)
 
             return render_template('teacherShowMyTests.html', IdExam=IdExamForm, myTest=tests, myAppeal=dates, myExam=AllExams)
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
     else:
         return redirect('/')
 
@@ -234,20 +203,13 @@ def deleteCurrentTest():
 @login_required
 def updateCurrentTest():
     if current_user.is_authenticated:
-        try:
             IdExamForm = int(request.form["IdExam"])
             IdTestForm = int(request.form["IdTest"])
-
-            session = Session()
 
             tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).first()
             dates = session.query(Appeals).filter(Appeals.IdTest == IdTestForm).first()
 
             return render_template('teacherUpdateTests.html', myTest=tests, IdExam=IdExamForm, IdTest=IdTestForm, myAppeal=dates)
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
     else:
         return redirect('/')
 
@@ -255,29 +217,36 @@ def updateCurrentTest():
 @login_required
 def ReUpdateCurrentTest():
     if current_user.is_authenticated:
-        try:
-            IdTestForm = int(request.form["IdTest"])
-            IdExamForm = int(request.form["IdExam"])
+        IdTestForm = int(request.form["IdTest"])
+        IdExamForm = int(request.form["IdExam"])
 
-            NameForm = request.form["name"]
-            TipoForm = request.form["type"]
-            ValForm = request.form["value"]
+        NameForm = request.form["name"]
+        TipoForm = request.form["type"]
+        ValForm = request.form["value"]
 
-            session = Session()
-
-            session.query(Tests).filter(and_(Tests.Id == IdTestForm, Tests.IdExam == IdExamForm)).update({
+        session.query(Tests).filter(and_(Tests.Id == IdTestForm, Tests.IdExam == IdExamForm)).update({
                 Tests.TestName: NameForm,
                 Tests.Tipology: TipoForm,
                 Tests.ValType: ValForm
-            })
+        })
 
-            session.commit()
+        session.commit()
 
-            return render_template('teacherArea.html')
+        return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
+    else:
+        return redirect('/')
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
+@app_teacherTest.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
+@login_required
+def enrolledStudents():
+    if current_user.is_authenticated:
+        IdAppealForm = int(request.form["IdAppeal"])
+        # Mostra tutti gli studenti iscritti ai relativi corsi
+        AllStudents = session.query(Sustains.IdStudent, Students.Surname, Students.Name, Students.Email).filter(
+            and_(Sustains.IdAppeal == IdAppealForm)).order_by(Students.Email)
+        for c in AllStudents:
+            print(c)
+        return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents, IdAppeal=IdAppealForm)
     else:
         return redirect('/')
 
@@ -285,32 +254,33 @@ def ReUpdateCurrentTest():
 @login_required
 def registrationTest():
     if current_user.is_authenticated:
-        try:
-            IdExamForm = int(request.form["IdExam"])
-            return render_template('teacherRegistrationTest.html', IdExam=IdExamForm)
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
+        IdExamForm = int(request.form["IdExam"])
+        return render_template('teacherRegistrationTest.html', IdExam=IdExamForm)
     else:
         return redirect('/')
+
 
 @app_teacherTest.route('/registrationAppeal', methods=['POST'])
 @login_required
 def registrationAppeal():
     if current_user.is_authenticated:
-        try:
-            IdExamForm = int(request.form["IdExam"])
-            IdTestForm = int(request.form["IdTest"])
-            return render_template('teacherRegistrationAppeal.html', IdExam=IdExamForm, IdTest=IdTestForm)
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return render_template('error.html', message="Errore durante l'elaborazione della richiesta.")
+        IdExamForm = int(request.form["IdExam"])
+        IdTestForm = int(request.form["IdTest"])
+        return render_template('teacherRegistrationAppeal.html', IdExam=IdExamForm, IdTest=IdTestForm)
     else:
         return redirect('/')
 
-# Esegui l'app Flask
-if __name__ == '__main__':
-    app.run(debug=True)
+@app_teacherTest.route('/registrationValutation', methods=['POST'])
+@login_required
+def registrationValutationNotFinal():
+    if current_user.is_authenticated:
+        IdAppealForm = int(request.form["IdAppeal"])
+        IdStudentForm = int(request.form["IdStudent"])
+        print("IdAppealForm:", IdAppealForm)
+        print("IdStudentForm:", IdStudentForm)
+
+        return render_template('teacherGiveValutation.html', IdAppeal=IdAppealForm, IdStudent=IdStudentForm)
+    else:
+        return redirect('/')
+
 

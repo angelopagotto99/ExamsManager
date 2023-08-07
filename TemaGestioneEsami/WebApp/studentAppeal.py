@@ -46,18 +46,30 @@ Sustains = Base.classes.Sustains
 @login_required
 def showAllAppeals():
     if current_user.is_authenticated:
-        '''
-        all_appeals_data = session.query(Appeals). \
-            join(Tests, Appeals.IdTest == Tests.Id). \
-            join(Exams, Tests.IdExam == Exams.Id). \
-            options(joinedload(Appeals.Test).joinedload(Tests.Exam)). \
-            order_by(Tests.TestName, Appeals.ExamData).all()
-        '''
-        all_appeals = session.query(Appeals, Tests, Exams).join(Tests, Appeals.IdTest == Tests.Id). \
-            join(Exams, Tests.IdExam == Exams.Id). \
-            order_by(Tests.TestName, Appeals.ExamData).all()
+        # tutti gli appelli esistenti
+        allAppeal = session.query(Appeals.Id, Appeals.ExamData, Appeals.ValutationExpireData, Appeals.IdTest)
+        # gli  appelli a cui sono già iscritto
+        myAppeal = session.query(Sustains.IdAppeal).filter(current_user.id == Sustains.IdStudent)
+        # lista degli appelli a cui posso iscrivermi
+        displayAppeals = session.query(Appeals.Id, Exams.ExamName, Tests.TestName,
+                                       Exams.Faculty, Exams.IdTeacher,
+                                       Appeals.IdTest).filter(Appeals.Id.notin_(myAppeal))
 
-        return render_template('studentShowAllAppeal.html', allAppeal=all_appeals)
+        # numero d'iscrizioni fatte per ciascun corso
+        nEnrollmentsGroup = \
+            session.query(func.count(Sustains.Id), Sustains.IdAppeal) \
+                .join(Appeals) \
+                .group_by(Sustains.IdAppeal)
+        enrolledCoursesId = session.query(Sustains.IdAppeal).distinct(Sustains.IdAppeal)
+        neverEnrolledCourses = session.query(Appeals.Id).filter(
+            Appeals.Id.notin_(enrolledCoursesId))
+
+        # informazioni riguardo i docenti
+        teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
+
+        return render_template('studentShowAllAppeal.html', courses=displayAppeals, teachersInfo=teachersInfo,
+                               allCourses=allAppeal, nEnrollmentsGroup=nEnrollmentsGroup,
+                               neverEnrolledCourses=neverEnrolledCourses)
     else:
         return redirect('/')
 
@@ -79,7 +91,17 @@ def enrollStudentAppeal():
         IdAppealForm = int(request.form["IdAppeal"])
         today = date.today()
 
-        newEnrollment = Sustains(IdStudent=current_user.id, IdAppeal=IdAppealForm,isValid=True)
+        # Controlla se lo studente è già iscritto all'appello
+        already_enrolled = session.query(Sustains).filter(
+            Sustains.IdStudent == current_user.id,
+            Sustains.IdAppeal == IdAppealForm,
+            Sustains.isValid == True
+        ).first()
+
+        if already_enrolled:
+            return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
+
+        newEnrollment = Sustains(IdStudent=current_user.id, IdAppeal=IdAppealForm, isValid=True)
         session.add(newEnrollment)
         session.commit()
 

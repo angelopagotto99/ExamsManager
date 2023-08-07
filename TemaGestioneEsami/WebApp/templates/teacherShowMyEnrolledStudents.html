@@ -114,17 +114,16 @@
                     <th class="w-auto" scope="row"></th>
                     <td class="w-50">{{ c.Surname }} {{ c.Name }}</td>
                     <td class="w-50">
-                    {% for s in Valutations %}
-                    {% if s.Idstudent==c.Id %}
-                    {{ s.Valutation }}
-                    {% endif %}
-                    {% endfor %}
+
                     </td>
-                    <td class="w-50">{{ c.Matricola }}</td>
+
+                    <td class="w-50">{{ c.Email }}</td>
                     <td>
+
                     <form action='/registrationValutation' method="POST" class="d-inline">
                           <input type="hidden" name="IdAppeal" value="{{ IdAppeal }}">
-                          <input type="hidden" name="IdStudent" value="{{ c.Id }}">
+                      <input type="hidden" name="IdStudent" value="{{ c.IdStudent }}">
+
                           <button type="submit" class="btn btn-outline-dark">DAI VALUTAZIONE</button>
                     </form>
                   </tr>
