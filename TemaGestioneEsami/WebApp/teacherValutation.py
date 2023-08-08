@@ -77,13 +77,6 @@ def newValutationPartial():
         return redirect('/')
 
 
-from datetime import date
-
-from datetime import date
-
-from datetime import date, datetime
-
-from datetime import datetime
 
 @app_teacherValutation.route('/newValutationFinal', methods=['GET', 'POST'])
 @login_required
