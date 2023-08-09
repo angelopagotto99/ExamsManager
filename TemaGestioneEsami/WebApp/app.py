@@ -222,10 +222,10 @@ def newTeacher():
         facultyForm = request.form["faculty"]
         pwdForm = request.form["pwd"]
         checkPwdForm = request.form["pwd2"]
-
+        '''
         if not all([nameForm, surnameForm, emailForm, telephoneForm, facultyForm, pwdForm, checkPwdForm]):
             return render_template('teacherRegistration.html', error="missingFields")
-
+        '''
         if session.query(Teachers).filter_by(Email=emailForm).scalar():
             return render_template('teacherRegistration.html', error="email")
 
