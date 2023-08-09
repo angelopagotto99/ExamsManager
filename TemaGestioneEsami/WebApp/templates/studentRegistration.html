@@ -131,7 +131,7 @@
               {% if error is defined and error=="email" %}
                 <input name="email" type="email" class="form-control" id="exampleInputEmail2" aria-describedby="emailHelp" value="{{ email }}" required>
                 <div id="emailHelp1" class="form-text text-danger">Indirizzo Email già usato. Inserire Email diversa.</div>
-              {% elif error is defined and error=="pwd" %}
+              {% elif error is defined and error=="email" %}
                 <input name="email" type="email" class="form-control" id="exampleInputEmail3" aria-describedby="emailHelp" value="{{ email }}" required>
               {% else %}
                 <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="matricola@stud.unive.it" required>

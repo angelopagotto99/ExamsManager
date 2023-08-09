@@ -174,20 +174,22 @@ def newStudent():
         pwdForm = request.form["pwd"]
         checkPwdForm = request.form["pwd2"]
 
+        '''
         if not all([nameForm, surnameForm, emailForm, telephoneForm, facultyForm, matricolaForm, pwdForm, checkPwdForm]):
             return render_template('studentRegistration.html', error="missingFields")
+        '''
 
         if session.query(Students).filter_by(Email=emailForm).scalar():
-            return render_template('studentRegistration.html', error="emailExists")
+            return render_template('studentRegistration.html', error="email")
 
         if pwdForm != checkPwdForm:
-            return render_template('studentRegistration.html', error="passwordMismatch")
+            return render_template('studentRegistration.html', error="pwd")
 
         if not is_password_complex(pwdForm):
-            return render_template('studentRegistration.html', error="weakPassword")
+            return render_template('studentRegistration.html', error="pwd")
 
         if facultyForm not in ['Informatica', 'Scienze ambientali', 'Umanistica']:
-            return render_template('studentRegistration.html', error="invalidFaculty")
+            return render_template('studentRegistration.html', error="faculty")
 
         newStudent = Students(
             Name=nameForm,
@@ -225,16 +227,16 @@ def newTeacher():
             return render_template('teacherRegistration.html', error="missingFields")
 
         if session.query(Teachers).filter_by(Email=emailForm).scalar():
-            return render_template('teacherRegistration.html', error="emailExists")
+            return render_template('teacherRegistration.html', error="email")
 
         if pwdForm != checkPwdForm:
-            return render_template('teacherRegistration.html', error="passwordMismatch")
+            return render_template('teacherRegistration.html', error="pwd")
 
         if not is_password_complex(pwdForm):
-            return render_template('teacherRegistration.html', error="weakPassword")
+            return render_template('teacherRegistration.html', error="pwd")
 
         if facultyForm not in ['Informatica', 'Scienze ambientali', 'Umanistica']:
-            return render_template('teacherRegistration.html', error="invalidFaculty")
+            return render_template('teacherRegistration.html', error="faculty")
 
         newTeacher = Teachers(
             Name=nameForm,
