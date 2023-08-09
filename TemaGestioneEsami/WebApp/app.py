@@ -6,6 +6,7 @@
 # 	1. Mantenere la connessione con le altre pagine tramite la parte di blueprint di flask
 # 	2. Gestire il login e la registrazione.v
 
+import re
 import bcrypt
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -15,7 +16,6 @@ from sqlalchemy.orm import sessionmaker
 from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
-
 from teacherExam import app_teacherExam
 from teacherTest import app_teacherTest
 from teacherValutation import app_teacherValutation
@@ -30,7 +30,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # creazione dell'engine
-engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:postgres@localhost:5432/manager', echo=True)
 
 # cripta password
 bcrypt = Bcrypt(app)
@@ -82,27 +82,24 @@ def index():
     return render_template('home.html')
 
 
-# carica l'area privata degli studenti
 @app.route('/studentArea')
 @login_required
 def studentArea():
-    if current_user.is_authenticated:
-        return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
-    else:
-        return redirect('/')
+    return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
 
-
-# carica l'area privata dei docenti
 @app.route('/teacherArea')
 @login_required
 def teacherArea():
-    if current_user.is_authenticated:
-        return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
-    else:
-        return redirect('/')
+    return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
 
+def is_password_complex(password):
+    # Almeno 8 caratteri, almeno un numero, un carattere speciale e una lettera maiuscola
+    pattern = r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+    return re.match(pattern, password)
 
 # salva nella sessione l'identità dell'utente tramite la funzione login_user() di flask-login
+# Controllo e login dell'utente
+# Controllo e login dell'utente
 @app.route('/loginUser', methods=['GET', 'POST'])
 def loginUser():
     # ottiene i dati dai form della pagina login.html
@@ -110,34 +107,16 @@ def loginUser():
     pwdForm = request.form["pwd"]
 
     if request.method == 'POST':
-        userPwd = session.query(Students.Pwd).filter(
-            Students.Email == emailForm).first()  # ottiene un la password di un utente che ha l'email uguale a quella passata
-        if userPwd is not None:  # verifica se esiste uno studente registrato con emailForm
-            # lo studente è registrato
-            # tramite la funzione di bycrypt (check_password_hash) verifichiamo se la password inserita è uguale a quella nel database
-            # (la password passata viene cryptata tramite un hash è poi viene confrontata con la password del database)
-            if bcrypt.check_password_hash(userPwd.Pwd, pwdForm):  # verifica se la password è corretta
-                student = get_student_by_email(emailForm)
-                login_user(student)
-                return redirect('/studentArea')
-            else:
-                return render_template('login.html', error="invalidPwd", email=emailForm)
+        user = session.query(Students).filter_by(Email=emailForm).first() or \
+               session.query(Teachers).filter_by(Email=emailForm).first()
+
+        if user and bcrypt.check_password_hash(user.Pwd, pwdForm):
+            login_user(user)
+            return redirect('/studentArea' if isinstance(user, Students) else '/teacherArea')
         else:
-            userPwd = session.query(Teachers.Pwd).filter(Teachers.Email == emailForm).first()
-            if userPwd is not None:  # verifica se esiste un docente registrato con emailForm
-                # il docente è registrato
-                # tramite la funzione di bycrypt (check_password_hash) verifichiamo se la password inserita è uguale a quella nel database
-                # (la password passata viene cryptata tramite un hash è poi viene confrontata con la password del database)
-                if bcrypt.check_password_hash(userPwd.Pwd, pwdForm):  # verifica se la password è corretta
-                    teacher = get_teacher_by_email(emailForm)
-                    login_user(teacher)
-                    return redirect('/teacherArea')
-                else:
-                    return render_template('login.html', error="invalidPwd", email=emailForm)
-            else:
-                return render_template('login.html', error="notRegisteredUser", email=emailForm)
-    else:
-        return redirect('/')
+            return render_template('login.html', error="invalidCredentials", email=emailForm)
+
+    return redirect('/')
 
 
 # ricava le informazioni dello studente dalla email univoca
@@ -162,82 +141,96 @@ def logout():
 
 # Crea un nuovo studente e lo aggiunge al database ottenendo le informazioni dalla pagina studentRegistration.html.
 # La email dello studente deve essere univoca, se esiste già uno studente registrato con quella email lo studente non viene creato.
+# Crea un nuovo studente e lo aggiunge al database
+# Crea un nuovo studente e lo aggiunge al database
 @app.route('/registration/newStudent', methods=['GET', 'POST'])
 def newStudent():
-    nameForm = request.form["name"]
-    surnameForm = request.form["surname"]
-    emailForm = request.form["email"]
-    telephoneForm = request.form["telephone"]
-    facultyForm = request.form["faculty"]
-    matricolaForm = request.form["matricola"]
-    pwdForm = request.form["pwd"]
-    checkPwdForm = request.form["pwd2"]
-
     if request.method == 'POST':
-        existStudent = session.query(Students.Id).filter(Students.Email == emailForm).first()  # ottiene un l'id di un utente che ha l'email uguale a quella passata
-        if existStudent is None:  # verifica se non esiste alcuno studente registrato con la email emailForm
-            if facultyForm == 'Informatica' or facultyForm == 'Scienze ambientali' or facultyForm == 'Umanistica':  # controllo se la facoltà inserita è corretta
+        nameForm = request.form["name"]
+        surnameForm = request.form["surname"]
+        emailForm = request.form["email"]
+        telephoneForm = request.form["telephone"]
+        facultyForm = request.form["faculty"]
+        matricolaForm = request.form["matricola"]
+        pwdForm = request.form["pwd"]
+        checkPwdForm = request.form["pwd2"]
 
-                if pwdForm == checkPwdForm:  # controllo se la password e la conferma sono uguali
-                    # Crea lo studente
-                    newStudent = Students(Name=nameForm, Matricola=matricolaForm, Surname=surnameForm, Email=emailForm, Telephone=telephoneForm, Faculty=facultyForm,
-                                          Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8'))  # generate_password_hash(pwdForm): genera un hash della password utilizzando bcrypt
-                    session.add(newStudent)  # aggiunge lo studente al database
-                    session.commit()  # conferma le modifiche
-                    return redirect('/')
-                else:
-                    return render_template('studentRegistration.html', error="pwd", name=nameForm, surname=surnameForm,
-                                           telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
-            else:
-                return render_template('studentRegistration.html',error="faculty",name=nameForm, surname=surnameForm,
-                                           telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
-        else:
-            return render_template('studentRegistration.html', error="email", name=nameForm, surname=surnameForm,
-                                   telephone=telephoneForm, email=emailForm, pwd1=pwdForm,
-                                   pwd2=checkPwdForm)
+        if not all([nameForm, surnameForm, emailForm, telephoneForm, facultyForm, matricolaForm, pwdForm, checkPwdForm]):
+            return render_template('studentRegistration.html', error="missingFields")
+
+        if session.query(Students).filter_by(Email=emailForm).scalar():
+            return render_template('studentRegistration.html', error="emailExists")
+
+        if pwdForm != checkPwdForm:
+            return render_template('studentRegistration.html', error="passwordMismatch")
+
+        if not is_password_complex(pwdForm):
+            return render_template('studentRegistration.html', error="weakPassword")
+
+        if facultyForm not in ['Informatica', 'Scienze ambientali', 'Umanistica']:
+            return render_template('studentRegistration.html', error="invalidFaculty")
+
+        newStudent = Students(
+            Name=nameForm,
+            Matricola=matricolaForm,
+            Surname=surnameForm,
+            Email=emailForm,
+            Telephone=telephoneForm,
+            Faculty=facultyForm,
+            Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8')
+        )
+        session.add(newStudent)
+        session.commit()
+        return redirect('/')
+
     else:
-        return redirect('/registration/newStudent')
-
+        return render_template('studentRegistration.html')
 
 
 # Crea un nuovo docente e lo aggiunge al database ottenendo le informazioni dalla pagina teacherRegistration.html.
 # La email del docente e la matricola non devono essere mai stati utilizzata prima per registrarsi.
 # I primi 6 caratteri della email devono corrispondere alla matricola.
+# Crea un nuovo docente e lo aggiunge al database
 @app.route('/registration/newTeacher', methods=['GET', 'POST'])
 def newTeacher():
-    nameForm = request.form["name"]
-    surnameForm = request.form["surname"]
-    emailForm = request.form["email"]
-    telephoneForm = request.form["telephone"]
-    facultyForm = request.form["faculty"]
-    pwdForm = request.form["pwd"]
-    checkPwdForm = request.form["pwd2"]
-
     if request.method == 'POST':
-            usedEmail = session.query(Teachers.Id).filter(Teachers.Email == emailForm).first()
-            if usedEmail is None:  # controlla se emailForm è usata da qualche docente
-                    #existTeacher = session.query(Teachers.Id).filter(Teachers.Email == emailForm).first()  # ottiene un l'id di un docente che ha l'email uguale a quella passata
-                    #if existTeacher is None:  # verifica se non esiste nessun docente con la mail usata per registrarsi
-                    if facultyForm=='Informatica' or facultyForm=='Scienze ambientali' or facultyForm=='Umanistica': #controllo se la facoltà inserita è corretta
-                        if pwdForm == checkPwdForm: # controllo se la password e la conferma sono uguali
-                            # Crea il docente
-                            newTeacher = Teachers(Name=nameForm, Surname=surnameForm, Email=emailForm, Faculty=facultyForm,
-                                                  Telephone=telephoneForm,
-                                                  Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8'))  # generate_password_hash(pwdForm): genera un hash della password utilizzando bcrypt
-                            session.add(newTeacher) # aggiunge il docente al database
-                            session.commit() # conferma le modifiche
-                            return redirect('/')
-                        else:
-                            return render_template('teacherRegistration.html', error="pwd", name=nameForm, surname=surnameForm, faculty=facultyForm,
-                                                   telephone=telephoneForm, email=emailForm, pwd1=pwdForm)
-                    else:
-                        return render_template('teacherRegistration.html', error="faculty", name=nameForm, surname=surnameForm,telephone=telephoneForm, faculty=facultyForm, email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
-            else:
-                return render_template('teacherRegistration.html', error="email", name=nameForm, surname=surnameForm,
-                                       telephone=telephoneForm, faculty=facultyForm ,email=emailForm, pwd1=pwdForm, pwd2=checkPwdForm)
+        nameForm = request.form["name"]
+        surnameForm = request.form["surname"]
+        emailForm = request.form["email"]
+        telephoneForm = request.form["telephone"]
+        facultyForm = request.form["faculty"]
+        pwdForm = request.form["pwd"]
+        checkPwdForm = request.form["pwd2"]
+
+        if not all([nameForm, surnameForm, emailForm, telephoneForm, facultyForm, pwdForm, checkPwdForm]):
+            return render_template('teacherRegistration.html', error="missingFields")
+
+        if session.query(Teachers).filter_by(Email=emailForm).scalar():
+            return render_template('teacherRegistration.html', error="emailExists")
+
+        if pwdForm != checkPwdForm:
+            return render_template('teacherRegistration.html', error="passwordMismatch")
+
+        if not is_password_complex(pwdForm):
+            return render_template('teacherRegistration.html', error="weakPassword")
+
+        if facultyForm not in ['Informatica', 'Scienze ambientali', 'Umanistica']:
+            return render_template('teacherRegistration.html', error="invalidFaculty")
+
+        newTeacher = Teachers(
+            Name=nameForm,
+            Surname=surnameForm,
+            Email=emailForm,
+            Faculty=facultyForm,
+            Telephone=telephoneForm,
+            Pwd=bcrypt.generate_password_hash(pwdForm).decode('utf-8')
+        )
+        session.add(newTeacher)
+        session.commit()
+        return redirect('/')
 
     else:
-        return redirect('/registration/newTeacher')
+        return render_template('teacherRegistration.html')
 
 #mostro le info del docente attualmente loggato
 @app.route('/showTeacherInfo',methods=['GET', 'POST'])
@@ -250,19 +243,28 @@ def showTeacherInfo():
         redirect('/')
 
 #aggiorno le info del docente quando vuole aggiornare i suoi dati
-@app.route('/updateTeacherInfo',methods=['GET', 'POST'])
+@app.route('/updateTeacherInfo', methods=['POST'])
+@login_required
 def updateTeacherInfo():
-    nameForm = request.form["name"]
-    surnameForm = request.form["surname"]
-    emailForm = request.form["email"]
-    telephoneForm = request.form["telephone"]
-    if current_user.is_authenticated:
-        session.query(Teachers).filter(and_(Teachers.Id == current_user.id)).update(
-            {Teachers.Name: nameForm, Teachers.Surname: surnameForm, Teachers.Telephone: telephoneForm, Teachers.Email: emailForm})
-        session.commit()
+    if request.method == 'POST':
+        nameForm = request.form["name"]
+        surnameForm = request.form["surname"]
+        emailForm = request.form["email"]
+        telephoneForm = request.form["telephone"]
+
+        if not isinstance(current_user, User) or not current_user.is_authenticated:
+            return redirect('/')
+
+        teacher = session.query(Teachers).get(current_user.id)
+        if teacher:
+            teacher.Name = nameForm
+            teacher.Surname = surnameForm
+            teacher.Email = emailForm
+            teacher.Telephone = telephoneForm
+            session.commit()
+
         return render_template('teacherArea.html', name=nameForm, surname=surnameForm)
-    else:
-        redirect('/')
+
 
 @app.route('/registrationStudent')
 def registrationStudent():
