@@ -100,6 +100,7 @@ def is_password_complex(password):
 # salva nella sessione l'identità dell'utente tramite la funzione login_user() di flask-login
 # Controllo e login dell'utente
 # Controllo e login dell'utente
+# salva nella sessione l'identità dell'utente tramite la funzione login_user() di flask-login
 @app.route('/loginUser', methods=['GET', 'POST'])
 def loginUser():
     # ottiene i dati dai form della pagina login.html
@@ -107,16 +108,34 @@ def loginUser():
     pwdForm = request.form["pwd"]
 
     if request.method == 'POST':
-        user = session.query(Students).filter_by(Email=emailForm).first() or \
-               session.query(Teachers).filter_by(Email=emailForm).first()
-
-        if user and bcrypt.check_password_hash(user.Pwd, pwdForm):
-            login_user(user)
-            return redirect('/studentArea' if isinstance(user, Students) else '/teacherArea')
+        userPwd = session.query(Students.Pwd).filter(
+            Students.Email == emailForm).first()  # ottiene un la password di un utente che ha l'email uguale a quella passata
+        if userPwd is not None:  # verifica se esiste uno studente registrato con emailForm
+            # lo studente è registrato
+            # tramite la funzione di bycrypt (check_password_hash) verifichiamo se la password inserita è uguale a quella nel database
+            # (la password passata viene cryptata tramite un hash è poi viene confrontata con la password del database)
+            if bcrypt.check_password_hash(userPwd.Pwd, pwdForm):  # verifica se la password è corretta
+                student = get_student_by_email(emailForm)
+                login_user(student)
+                return redirect('/studentArea')
+            else:
+                return render_template('login.html', error="invalidPwd", email=emailForm)
         else:
-            return render_template('login.html', error="invalidCredentials", email=emailForm)
-
-    return redirect('/')
+            userPwd = session.query(Teachers.Pwd).filter(Teachers.Email == emailForm).first()
+            if userPwd is not None:  # verifica se esiste un docente registrato con emailForm
+                # il docente è registrato
+                # tramite la funzione di bycrypt (check_password_hash) verifichiamo se la password inserita è uguale a quella nel database
+                # (la password passata viene cryptata tramite un hash è poi viene confrontata con la password del database)
+                if bcrypt.check_password_hash(userPwd.Pwd, pwdForm):  # verifica se la password è corretta
+                    teacher = get_teacher_by_email(emailForm)
+                    login_user(teacher)
+                    return redirect('/teacherArea')
+                else:
+                    return render_template('login.html', error="invalidPwd", email=emailForm)
+            else:
+                return render_template('login.html', error="notRegisteredUser", email=emailForm)
+    else:
+        return redirect('/')
 
 
 # ricava le informazioni dello studente dalla email univoca
