@@ -151,9 +151,14 @@
               <label for="exampleInputPassword1" class="form-label">Password <span class="text-danger">*</span></label>
               {% if error is defined and error=="pwd" %}
                 <input name="pwd" type="password" class="form-control" id="exampleInputPassword" required value="{{ pwd1 }}">
+                <div id="emailHelp2" class="form-text text-danger">Password non valida.</div>
+                <div id="emailHelp3" class="form-text text-danger">La password dev'essere composta da almeno 8 caratteri,</div>
+                <div id="emailHelp4" class="form-text text-danger">1 lettera maiuscola e 1 carattere speciale..</div>
               {% else %}
                 <input name="pwd" type="password" class="form-control" id="exampleInputPassword2" required>
+
               {% endif %}
+              <div class="invalid-feedback">Password non valida.</div>
             </div>
 
 
