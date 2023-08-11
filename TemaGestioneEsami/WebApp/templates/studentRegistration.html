@@ -139,11 +139,19 @@
             </div>
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Faculty <span class="text-danger">*</span></label>
-              {% if error is defined and error=="faculty" %}
-                <input name="faculty" type="text" class="form-control" id="exampleInputEmail11" required value="{{ faculty }}">
+              <label for="exampleInputEmail1" class="form-label">Faculty<span class="text-danger">*</span></label>
+              {% if error is not defined %}
+                <select name="faculty" class="form-control" id="exampleInputEmail11" required value="{{ faculty }}">
+                  <option faculty="Informatica">Informatica</option>
+                  <option faculty="Scienze ambientali">Scienze ambientali</option>
+                  <option faculty="Umanistica">Umanistica</option>
+                </select>
               {% else %}
-                <input name="faculty" type="text" class="form-control" id="exampleInputEmail12" required>
+                <select name="faculty" class="form-control" id="exampleInputEmail12" required value="{{ faculty }}">
+                  <option faculty="Informatica" {% if type =='Informatica' %} selected {% endif %}>Informatica</option>
+                  <option faculty="Scienze ambientali" {% if type =='Scienze_ambientali' %} selected {% endif %}>Scienze ambientali</option>
+                  <option faculty="Umanistica" {% if type =='Umanistica' %} selected {% endif %}>Umanistica</option>
+                </select>
               {% endif %}
             </div>
 
