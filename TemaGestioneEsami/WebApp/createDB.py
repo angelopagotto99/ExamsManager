@@ -24,6 +24,9 @@ class Teachers(Base):
     Exams = relationship('Exams', back_populates="Teacher")
     # relazione con prove 1 a 1
     Test = relationship('Tests', uselist=False, back_populates="Responsabile")
+    __table_args__= (
+        CheckConstraint("\"Faculty\" = 'Informatica' OR \"Faculty\"  = 'Umanistica' OR \"Faculty\"  = 'Scienze Ambientali'", name='check_faculty'),
+    )
 
 
 class Sustains(Base):
@@ -33,11 +36,14 @@ class Sustains(Base):
     Id = Column(Integer, primary_key=True)
     IdStudent = Column(Integer, ForeignKey('Students.Id'))
     IdAppeal = Column(Integer, ForeignKey('ExamAppeals.Id'))
-    Valutation = Column(Float, nullable=False)
+    Valutation = Column(Float, nullable=True)
     isValid = Column(Boolean, nullable=True)
 
 
-    __table_args__ = (UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),)
+    __table_args__ = (
+        UniqueConstraint('IdStudent', 'IdAppeal', name="student_sustain_uc"),
+        CheckConstraint("\"Valutation\" >= 0 AND \"Valutation\" <= 31", name="check_voto"),
+    )
 
     # relazione con studenti n a m
     Student = relationship('Students', back_populates="Tests")
@@ -80,6 +86,12 @@ class Students(Base):
     Tests = relationship('Tests', secondary=Sustains)
     # relazione con esami n a m
     Exams = relationship('Exams', secondary=IsEnrolled)
+    __table_args__ = (
+        CheckConstraint(
+            "\"Faculty\" = 'Informatica' OR \"Faculty\"  = 'Umanistica' OR \"Faculty\"  = 'Scienze Ambientali'",
+            name='check_faculty'),
+    )
+
 
 
 class Exams(Base):
@@ -99,6 +111,11 @@ class Exams(Base):
     Teacher = relationship('Teachers', back_populates="Exams")
     Tests = relationship('Tests', back_populates="Exam")
     Students = relationship('Students', secondary=IsEnrolled)
+    __table_args__ = (
+        CheckConstraint(
+            "\"Faculty\" = 'Informatica' OR \"Faculty\"  = 'Umanistica' OR \"Faculty\"  = 'Scienze Ambientali'",
+            name='check_faculty'),
+    )
 
 
 class Tests(Base):
