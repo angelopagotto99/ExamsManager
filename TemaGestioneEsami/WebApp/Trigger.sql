@@ -1,3 +1,6 @@
+
+-- Trigger blocca appelli vecchi
+
 CREATE OR REPLACE FUNCTION annullaAppelliVecchi() RETURNS trigger AS $$
   BEGIN
     UPDATE "Sustains"
@@ -15,3 +18,22 @@ CREATE TRIGGER annullaAppelliVecchi
 BEFORE INSERT ON "Sustains"
 FOR EACH ROW
 EXECUTE FUNCTION annullaAppelliVecchi();
+
+
+--Trigger numero test
+
+CREATE OR REPLACE FUNCTION controlloNumeroTest() RETURNS trigger AS $$
+  BEGIN
+    IF((SELECT "nTest" FROM "Exams" WHERE "Id" = NEW."IdExam")=(SELECT COUNT(*) FROM "Tests" t WHERE t."IdExam" = NEW."IdExam")) THEN return null;
+    END IF;
+    return NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+
+
+DROP TRIGGER IF EXISTS controlloNumeroTest ON "Tests";
+CREATE TRIGGER controlloNumeroTest
+BEFORE INSERT ON "Tests"
+FOR EACH ROW
+EXECUTE FUNCTION controlloNumeroTest();

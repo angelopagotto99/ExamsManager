@@ -30,7 +30,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 # creazione dell'engine
-engine = create_engine('postgresql+pg8000://postgres:postgres@localhost:5432/manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
 
 # cripta password
 bcrypt = Bcrypt(app)
