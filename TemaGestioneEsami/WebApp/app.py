@@ -263,6 +263,15 @@ def showTeacherInfo():
     else:
         redirect('/')
 
+@app.route('/showStudentInfo',methods=['GET', 'POST'])
+def showStudentInfo():
+    if current_user.is_authenticated:
+        students = session.query(Students).filter(Students.Id == current_user.id).first()
+        studentInfo = session.query(Students.Name, Students.Surname, Students.Telephone, Students.Email).filter(and_(Students.Id == current_user.id)).first()
+        return render_template('studentInfoAcc.html', students=students, studentInfo=studentInfo)
+    else:
+        redirect('/')
+
 #aggiorno le info del docente quando vuole aggiornare i suoi dati
 @app.route('/updateTeacherInfo', methods=['POST'])
 @login_required
@@ -285,6 +294,29 @@ def updateTeacherInfo():
             session.commit()
 
         return render_template('teacherArea.html', name=nameForm, surname=surnameForm)
+
+#aggiorno le info del docente quando vuole aggiornare i suoi dati
+@app.route('/updateStudentInfo', methods=['POST'])
+@login_required
+def updateStudentInfo():
+    if request.method == 'POST':
+        nameForm = request.form["name"]
+        surnameForm = request.form["surname"]
+        emailForm = request.form["email"]
+        telephoneForm = request.form["telephone"]
+
+        if not isinstance(current_user, User) or not current_user.is_authenticated:
+            return redirect('/')
+
+        student = session.query(Students).get(current_user.id)
+        if student:
+            student.Name = nameForm
+            student.Surname = surnameForm
+            student.Email = emailForm
+            student.Telephone = telephoneForm
+            session.commit()
+
+        return render_template('studentArea.html', name=nameForm, surname=surnameForm)
 
 
 @app.route('/registrationStudent')

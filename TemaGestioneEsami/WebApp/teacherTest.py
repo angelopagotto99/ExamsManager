@@ -166,12 +166,12 @@ def showAllTeacherAppeal():
                 .join(Tests, Appeals.IdTest == Tests.Id) \
                 .join(Exams, Tests.IdExam == Exams.Id) \
                 .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
-                .filter(Exams.IdTeacher == current_user.id) \
-                .group_by(Appeals.Id, Tests.Id, Exams.Id) \
-                .order_by(Exams.ExamName, Tests.TestName, Appeals.ExamData) \
+                .filter(Exams.IdTeacher == current_user.id, Tests.Id == Appeals.IdTest) \
+                .group_by(Appeals.Id, Exams.Id, Tests.Id) \
+                .order_by(Tests.TestName, Appeals.ExamData) \
                 .all()
 
-            return render_template('teacherShowMyAppeal.html', all_appeals_data=all_appeals_data)
+            return render_template('teacherShowMyAppeal.html', IdTests=idTests, all_appeals_data=all_appeals_data)
     else:
             return redirect('/')
 

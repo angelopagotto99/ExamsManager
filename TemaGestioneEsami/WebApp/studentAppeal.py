@@ -67,7 +67,52 @@ def showAllAppeals():
     else:
         return redirect('/')
 
+@app_studentAppeal.route('/showMyAppeals')
+@login_required
+def showMyAppeals():
+    if current_user.is_authenticated:
+        # Gli appelli a cui sono già iscritto
+        myAppeal_ids = session.query(Sustains).filter(current_user.id == Sustains.IdStudent)
 
+        # Lista di tutti gli appelli disponibili (esclusi quelli a cui sono già iscritto)
+        availableAppeals = session.query(Appeals.Id, Exams.ExamName, Tests.TestName,
+                                         Exams.Faculty, Exams.IdTeacher,
+                                         Appeals.IdTest).filter(Appeals.Id.notin_(myAppeal_ids))
+
+        all_appeals_data = session.query(Appeals, Tests, Exams
+                                         ) \
+            .join(Tests, Appeals.IdTest == Tests.Id) \
+            .join(Exams, Tests.IdExam == Exams.Id) \
+            .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
+            .filter(Sustains.IdStudent == current_user.id, Tests.Id == Appeals.IdTest) \
+            .group_by(Appeals.Id, Exams.Id, Tests.Id) \
+            .order_by(Tests.TestName, Appeals.ExamData) \
+            .all()
+
+        AllAppeal = session.query(Appeals.Id,
+                                 Tests.TestName,
+                                 Tests.Tipology,
+                                 Tests.ValType,
+                                 ) \
+            .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
+            .filter(Sustains.IdStudent == current_user.id) \
+            .group_by(Appeals.Id,
+                      Tests.TestName,
+                      Tests.ValType,
+                      Tests.Tipology)
+
+        # Numero di iscrizioni fatte per ciascun corso
+        nEnrollmentsGroup = \
+            session.query(func.count(Sustains.Id), Sustains.IdAppeal) \
+                .group_by(Sustains.IdAppeal)
+
+        # Informazioni riguardo i docenti
+        teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
+
+        return render_template('studentShowMyAppealReservation.html', all_appeals_data=all_appeals_data, teachersInfo=teachersInfo,
+                               nEnrollmentsGroup=nEnrollmentsGroup)
+    else:
+        return redirect('/')
 
 @app_studentAppeal.route('/showMyEnrolledExam')
 @login_required

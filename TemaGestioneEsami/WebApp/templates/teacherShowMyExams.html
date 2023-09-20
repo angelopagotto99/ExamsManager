@@ -80,7 +80,7 @@
         <header>
           <div class="d-flex flex-column flex-md-row align-items-center pb-3 mb-4 border-bottom">
             <a href="/teacherArea" class="d-flex align-items-center text-dark text-decoration-none">
-              <span class="fs-4">EXAMS_MANAGER</span>
+              <span class="fs-4">HOME</span>
             </a>
 
             <nav class="d-inline-flex mt-2 mt-md-0 ms-md-auto">
@@ -95,7 +95,7 @@
         </header>
 
         <main>
-          {% if myCourses.count != 0 %}
+          {% if myCourses %}
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -143,9 +143,9 @@
             <br>
             <div class="d-flex justify-content-center">
               <div class="alert alert-primary text-center" role="alert">
-                <h4>Whooops!</h4><h6>Sembra che non ti sia ancora iscritto a nessun corso</h6>
+                <h4>Whooops!</h4><h6>Sembra che tu non abbia registrato alcun corso.</h6>
                 <br>
-                <a href='/newExam' class="btn btn-primary">Aggiungi un esame</a>
+                <a href='/newExam' class="btn btn-primary">AGGIUNGI ESAME</a>
               </div>
             </div>
           {% endif %}

@@ -20,7 +20,7 @@ FOR EACH ROW
 EXECUTE FUNCTION annullaAppelliVecchi();
 
 
---Trigger numero test
+--Trigger numero testl
 
 CREATE OR REPLACE FUNCTION controlloNumeroTest() RETURNS trigger AS $$
   BEGIN
