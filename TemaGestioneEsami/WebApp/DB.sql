@@ -82,6 +82,38 @@ CREATE TABLE Sustains(
 
 );
 
+--RUOLI
+ CREATE ROLE Studente;
+ CREATE ROLE Insegnante;
+ CREATE ROLE Amministratore;
+
+--Studente:
+ GRANT USAGE ON SCHEMA public to studente;
+
+ GRANT SELECT
+ ON "Students", "Sustains", "IsEnrolled", "Exams", "Tests", "ExamAppeals"
+ TO Studente;
+
+ GRANT INSERT,UPDATE, DELETE
+ ON "Sustains", "IsEnrolled"
+ TO Studente;
+
+--Insegnante:
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public to insegnante;
+ GRANT SELECT
+ ON "Teachers", "Sustains", "IsEnrolled", "Exams", "Tests", "ExamAppeals"
+ TO Insegnante;
+
+ GRANT INSERT,UPDATE, DELETE
+ ON "Exams","Tests", "ExamAppeals"
+ TO Insegnante;
+
+--Admin:
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public to amministratore;
+ GRANT ALL PRIVILEGES
+ ON ALL TABLES IN SCHEMA public
+ TO Amministratore;
+
 --date per la registrazione del voto(inizio e scadenza)
 
 

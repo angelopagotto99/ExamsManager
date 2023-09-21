@@ -37,3 +37,4 @@ CREATE TRIGGER controlloNumeroTest
 BEFORE INSERT ON "Tests"
 FOR EACH ROW
 EXECUTE FUNCTION controlloNumeroTest();
+
