@@ -110,28 +110,29 @@
               </thead>
             <tbody>
 
-                {% for c in myStudents %}
+                {% for s,v in myStudents %}
                   <tr>
                     <th class="w-auto" scope="row"></th>
-                    <td class="w-50">{{ c.Surname }} {{ c.Name }}</td>
-                    <td class="w-50">
+                    <td class="w-50">{{ v.Surname }} {{ v.Name }}</td>
+                    <td class="w-50"> {{ s.Valutation }} </td>
 
-                    </td>
-
-                    <td class="w-50">{{ c.Email }}</td>
+                    <td class="w-50">{{ v.Email }}</td>
                     <td>
 
                     <form action='/registrationValutation' method="POST" class="d-inline">
                           <input type="hidden" name="IdAppeal" value="{{ IdAppeal }}">
-                      <input type="hidden" name="IdStudent" value="{{ c.IdStudent }}">
+                      <input type="hidden" name="IdStudent" value="{{ s.IdStudent }}">
 
                           <button type="submit" class="btn btn-outline-dark">DAI VALUTAZIONE</button>
                     </form>
                   </tr>
                 {% endfor %}
+
               </tbody>
             </table>
-
+          <p class="lead">
+              <a href='/showAllTeacherAppeal' class="btn btn-lg btn-danger border-white bg-blue">Torna indietro</a>
+            </p>
           {% else %}
             <br>
             <div class="d-flex justify-content-center">

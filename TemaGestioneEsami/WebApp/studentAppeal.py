@@ -53,7 +53,14 @@ def showAllAppeals():
         availableAppeals = session.query(Appeals.Id, Exams.ExamName, Tests.TestName,
                                          Exams.Faculty, Exams.IdTeacher,
                                          Appeals.IdTest).filter(Appeals.Id.notin_(myAppeal_ids))
-
+        all_appeals_data = session.query(Appeals, Tests, Exams) \
+            .join(Tests, Appeals.IdTest == Tests.Id) \
+            .join(Exams, Tests.IdExam == Exams.Id) \
+            .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
+            .filter(Tests.Id == Appeals.IdTest,Appeals.Id.notin_(myAppeal_ids)) \
+            .group_by(Appeals.Id, Exams.Id, Tests.Id) \
+            .order_by(Tests.TestName, Appeals.ExamData) \
+            .all()
         # Numero di iscrizioni fatte per ciascun corso
         nEnrollmentsGroup = \
             session.query(func.count(Sustains.Id), Sustains.IdAppeal) \
@@ -62,7 +69,7 @@ def showAllAppeals():
         # Informazioni riguardo i docenti
         teachersInfo = session.query(Teachers.Id, Teachers.Name, Teachers.Surname)
 
-        return render_template('studentShowAllAppeal.html', courses=availableAppeals, teachersInfo=teachersInfo,
+        return render_template('studentShowAllAppeal.html', courses=all_appeals_data, teachersInfo=teachersInfo,
                                nEnrollmentsGroup=nEnrollmentsGroup)
     else:
         return redirect('/')

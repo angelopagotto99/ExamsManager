@@ -114,15 +114,16 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public to amministratore;
  ON ALL TABLES IN SCHEMA public
  TO Amministratore;
 
---date per la registrazione del voto(inizio e scadenza)
 
 
 
+--INDICI
 
-
-
-
-
+CREATE INDEX IndiceTest ON Tests (Id);
+CREATE INDEX IndiceEsami ON Exams (Id);
+CREATE INDEX IndiceInsegnanti ON Teachers (Id);
+CREATE INDEX IndiceStudenti ON Students (Id);
+CREATE INDEX IndiceAppelli ON ExamAppeals (Id);
 
 /**
 

@@ -9,7 +9,7 @@ INDICIZZAZIONE DELLE PAGINE:(Samu)
 
 TRIGGER:(Giova / Angelo)
 3. Trigger sul numero dei test creati (bloccare inserimento se il numero di test, decisi al momento della creazione dell'esame,
-    ha già raggiunto il limite consentito);
+    ha già raggiunto il limite consentito);(fatto)
 4. Altri Trigger o check;
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -20,16 +20,15 @@ COSE FINALI:(Giova/Angelo/Samu)
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 FRONT-END e BACK-END: (Angelo)
-7. Fare pagina studentShowMyAppeal.html;
+7. Fare pagina studentShowMyAppeal.html; (fatto)
 8. Sistemare inoltre le seguenti cose:
 
-    - Bug visualizzazione degli appelli disponibili lato studente(ne vengono fuori a bizzeffe);
-    - Non scompare il tasto "dai valutazione" lato docente(una volta data la valutazione, il docente non può più dare valutazioni per quel studente);
+    - Bug visualizzazione degli appelli disponibili lato studente(ne vengono fuori a bizzeffe);(fatto)
     - Non appare il tasto "crea appello" quando il counter del numero di test ha raggiunto la soglia;
-    - Ottimizzare la visualizzazione delle informazioni lato front end (info più carine);
-    - Sistemare / Aggiungere altri collegamenti alle pagine;
+    - Ottimizzare la visualizzazione delle informazioni lato front end (info più carine);(fatto)
+    - Sistemare / Aggiungere altri collegamenti alle pagine;(fatto)
 
-9. Aggiungere tasto indietro per scorrere meglio le pagine per tornare indietro;
-10. Definire ruoli docente, studente e admin(forse).
+9. Aggiungere tasto indietro per scorrere meglio le pagine per tornare indietro;(fatto)
+10. Definire ruoli docente, studente e admin(forse). (fatto)
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------

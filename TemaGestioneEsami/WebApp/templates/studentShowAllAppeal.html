@@ -92,31 +92,29 @@
         </header>
 
         <main>
-            {% if courses.count() != 0 %}
+            {% if courses %}
     <table class="table table-striped table-hover table-bordered">
       <thead>
         <tr>
           <th scope="col" class="">NOME CORSO</th>
           <th scope="col" class="">NOME TEST</th>
-          <th scope="col" class="">DOCENTE</th>
+          <th scope="col" class="">TIPOLOGIA</th>
+          <th scope="col" class="">DATA</th>
           <th scope="col" class="">AZIONI</th>
         </tr>
       </thead>
       <tbody>
-        {% for c in courses %}
+        {% for a,t,e in courses %}
           <tr>
-            <td class="w-50">{{ c.ExamName }}</td>
-            <td class="w-50">{{ c.TestName }}</td>
+            <td class="w-50">{{ e.ExamName }}</td>
+            <td class="w-50">{{ t.TestName }}</td>
+            <td class="w-50">{{ t.Tipology }}</td>
+            <td class="w-50">{{ a.ExamData }}</td>
             <td class="w-auto">
-              {% for teacher in teachersInfo %}
-                {% if teacher.Id == c.IdTeacher %}
-                  {{ teacher.Name }} {{ teacher.Surname }}
-                {% endif %}
-              {% endfor %}
             </td>
             <td class="w-auto">
               <form action='/enrollStudentAppeal' method="POST" class="d-inline">
-                <input type="hidden" id="Id" name="IdAppeal" value="{{ c.Id }}">
+                <input type="hidden" id="Id" name="IdAppeal" value="{{ a.Id }}">
                 <button type="submit" class="btn btn-outline-dark">ISCRIVITI</button>
               </form>
             </td>
