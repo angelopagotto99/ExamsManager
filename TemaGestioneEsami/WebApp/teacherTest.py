@@ -134,7 +134,7 @@ def newAppeal():
 
                 new_exam_appeal = Appeals(
                     ExamData=DateForm,
-                    IdTest=idTests.Id,
+                    IdTest=IdTestForm,
                     ValutationExpireData=DateExForm
                 )
 
