@@ -143,13 +143,13 @@
               {% if error is not defined %}
                 <select name="faculty" class="form-control" id="exampleInputEmail11" required value="{{ faculty }}">
                   <option faculty="Informatica">Informatica</option>
-                  <option faculty="Scienze ambientali">Scienze ambientali</option>
+                  <option faculty="Scienze ambientali">Scienze Ambientali</option>
                   <option faculty="Umanistica">Umanistica</option>
                 </select>
               {% else %}
                 <select name="faculty" class="form-control" id="exampleInputEmail12" required value="{{ faculty }}">
                   <option faculty="Informatica" {% if type =='Informatica' %} selected {% endif %}>Informatica</option>
-                  <option faculty="Scienze ambientali" {% if type =='Scienze_ambientali' %} selected {% endif %}>Scienze ambientali</option>
+                  <option faculty="Scienze Ambientali" {% if type =='Scienze_Ambientali' %} selected {% endif %}>Scienze Ambientali</option>
                   <option faculty="Umanistica" {% if type =='Umanistica' %} selected {% endif %}>Umanistica</option>
                 </select>
               {% endif %}

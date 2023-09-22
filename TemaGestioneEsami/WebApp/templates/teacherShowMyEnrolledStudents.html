@@ -94,7 +94,7 @@
         </header>
 
         <main>
-          {% if myStudents.count != 0 %}
+          {% if myStudents %}
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -121,7 +121,7 @@
 
                     <form action='/registrationValutation' method="POST" class="d-inline">
                           <input type="hidden" name="IdAppeal" value="{{ IdAppeal }}">
-                      <input type="hidden" name="IdStudent" value="{{ s.IdStudent }}">
+                      <input type="hidden" name="IdStudent" value="{{ v.Id }}">
 
                           <button type="submit" class="btn btn-outline-dark">DAI VALUTAZIONE</button>
                     </form>

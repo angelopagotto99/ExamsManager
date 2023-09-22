@@ -243,7 +243,7 @@ def enrolledStudents():
         IdAppealForm = int(request.form["IdAppeal"])
         # Mostra tutti gli studenti iscritti ai relativi corsi
         AllStudents = session.query(Sustains , Students).filter(
-            and_(Sustains.IdAppeal == IdAppealForm)).order_by(Students.Email)
+            and_(Sustains.IdAppeal == IdAppealForm, Students.Faculty == Teachers.Faculty, Sustains.IdStudent == Students.Id)).order_by(Students.Email)
 
         return render_template('teacherShowMyEnrolledStudents.html', myStudents=AllStudents, IdAppeal=IdAppealForm)
     else:

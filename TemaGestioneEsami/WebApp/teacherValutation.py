@@ -66,7 +66,7 @@ def newValutationPartial():
                     and_(Sustains.IdStudent == IdStudentForm, Sustains.IdAppeal == IdAppealForm)).update(
                     {Sustains.Valutation: ValutationForm})
             AllStudents = session.query(Sustains , Students).filter(
-                and_(Sustains.IdAppeal == IdAppealForm)).order_by(Students.Email)
+                and_(Sustains.IdAppeal == IdAppealForm,Sustains.IdStudent==IdStudentForm, Teachers.Faculty == Students.Faculty)).order_by(Students.Email)
             session.commit()  # conferma le modifiche
             return render_template('teacherShowMyEnrolledStudents.html', IdAppeal=IdAppealForm, IdStudent=IdStudentForm,myStudents=AllStudents,
                                        IdValutations=myValutations)

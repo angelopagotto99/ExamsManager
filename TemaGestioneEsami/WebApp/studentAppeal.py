@@ -57,7 +57,7 @@ def showAllAppeals():
             .join(Tests, Appeals.IdTest == Tests.Id) \
             .join(Exams, Tests.IdExam == Exams.Id) \
             .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
-            .filter(Tests.Id == Appeals.IdTest,Appeals.Id.notin_(myAppeal_ids)) \
+            .filter(Tests.Id == Appeals.IdTest,Exams.Faculty == Students.Faculty, Appeals.Id.notin_(myAppeal_ids)) \
             .group_by(Appeals.Id, Exams.Id, Tests.Id) \
             .order_by(Tests.TestName, Appeals.ExamData) \
             .all()
@@ -91,7 +91,7 @@ def showMyAppeals():
             .join(Tests, Appeals.IdTest == Tests.Id) \
             .join(Exams, Tests.IdExam == Exams.Id) \
             .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
-            .filter(Sustains.IdStudent == current_user.id, Tests.Id == Appeals.IdTest) \
+            .filter(Sustains.IdStudent == current_user.id, Tests.Id == Appeals.IdTest, Exams.Faculty == Students.Faculty) \
             .group_by(Appeals.Id, Exams.Id, Tests.Id) \
             .order_by(Tests.TestName, Appeals.ExamData) \
             .all()
@@ -146,9 +146,10 @@ def enrollStudentAppeal():
             Sustains.isValid == True
         ).first()
 
+
         if already_enrolled:
             return render_template('studentArea.html', name=current_user.name, surname=current_user.surname)
-
+        #session.query(Sustains).filter(and_(Sustains.IdAppeal==IdAppealForm, Sustains.IdStudent==current_user.id)).update({Sustains.IdAppeal:IdAppealForm, Sustains.IdStudent:current_user.id, Sustains.isValid: True})
         newEnrollment = Sustains(IdStudent=current_user.id, IdAppeal=IdAppealForm, isValid=True)
         session.add(newEnrollment)
         session.commit()
