@@ -54,7 +54,7 @@ def newExam():
     ExamForm = request.form["exam"]
     DescriptionForm = request.form["description"]
     nTestForm = int(request.form["nTest"])
-    FacultyForm = request.form["num"]
+    FacultyForm = request.form["faculty"]
     CFUForm = int(request.form["CFU"])
     ValTypeForm = request.form["type"]
 
@@ -62,6 +62,8 @@ def newExam():
         if request.method == 'POST':
             # controllo sul titolo del corso
             usedTitle = session.query(Exams.Id).filter(Exams.ExamName == ExamForm).first()
+            if FacultyForm not in ['Informatica', 'Scienze Ambientali', 'Umanistica']:
+                return render_template('teacherExamRegistration.html', error="faculty")
             if usedTitle is None:  # controlla se titleForm è usata da qualche docente
                 # titleForm non è usata da nessun docente
                 if ValTypeForm == 'Idoneità':
