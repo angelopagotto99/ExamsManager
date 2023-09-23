@@ -156,7 +156,7 @@ def newAppeal():
 @app_teacherTest.route('/showAllTeacherAppeal', methods=['GET', 'POST'])
 @login_required
 def showAllTeacherAppeal():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
 
             # Recupera tutti gli appelli dei test dei vari esami con il numero di iscritti per ciascun appello
             idTests = session.query(Tests.Id).filter(
@@ -178,7 +178,7 @@ def showAllTeacherAppeal():
 @app_teacherTest.route('/deleteCurrentTest', methods=['POST'])
 @login_required
 def deleteCurrentTest():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
             IdExamForm = int(request.form["IdExam"])
             IdTestForm = int(request.form["IdTest"])
 
@@ -202,7 +202,7 @@ def deleteCurrentTest():
 @app_teacherTest.route('/updateCurrentTest', methods=['GET', 'POST'])
 @login_required
 def updateCurrentTest():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
             IdExamForm = int(request.form["IdExam"])
             IdTestForm = int(request.form["IdTest"])
 
@@ -216,7 +216,7 @@ def updateCurrentTest():
 @app_teacherTest.route('/ReUpdateCurrentTest', methods=['POST'])
 @login_required
 def ReUpdateCurrentTest():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         IdTestForm = int(request.form["IdTest"])
         IdExamForm = int(request.form["IdExam"])
 
@@ -239,7 +239,7 @@ def ReUpdateCurrentTest():
 @app_teacherTest.route('/showAllEnrolledStudents', methods=['GET', 'POST'])
 @login_required
 def enrolledStudents():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         IdAppealForm = int(request.form["IdAppeal"])
         # Mostra tutti gli studenti iscritti ai relativi corsi
         AllStudents = session.query(Sustains , Students).filter(
@@ -252,7 +252,7 @@ def enrolledStudents():
 @app_teacherTest.route('/registrationTest', methods=['POST'])
 @login_required
 def registrationTest():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
         return render_template('teacherRegistrationTest.html', IdExam=IdExamForm)
     else:
@@ -262,7 +262,7 @@ def registrationTest():
 @app_teacherTest.route('/registrationAppeal', methods=['POST'])
 @login_required
 def registrationAppeal():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         IdExamForm = int(request.form["IdExam"])
         IdTestForm = int(request.form["IdTest"])
         return render_template('teacherRegistrationAppeal.html', IdExam=IdExamForm, IdTest=IdTestForm)
@@ -272,7 +272,7 @@ def registrationAppeal():
 @app_teacherTest.route('/registrationValutation', methods=['POST'])
 @login_required
 def registrationValutationNotFinal():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         IdAppealForm = int(request.form["IdAppeal"])
         IdStudentForm = int(request.form["IdStudent"])
 

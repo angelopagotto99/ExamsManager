@@ -52,7 +52,7 @@ def newValutationPartial():
     IdStudentForm = int(request.form["IdStudent"])
     IdAppealForm = int(request.form["IdAppeal"])
 
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         if request.method == 'POST':
             # controllo sul titolo del corso
             # Verifica se esiste già una riga con Valutation non NULL per lo studente e l'appello specificato
@@ -84,7 +84,7 @@ def newValutationPartial():
 def newValutationFinal():
     IdExamForm = int(request.form["IdExam"])
 
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         if request.method == 'POST':
             student_enrollment = session.query(EnrolledStudents).filter(
                 EnrolledStudents.IdStudent == current_user.id,
@@ -99,7 +99,7 @@ def newValutationFinal():
                 average_valutation = session.query(func.avg(Sustains.Valutation)) \
                     .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
                     .join(Tests, Appeals.IdTest == Tests.Id) \
-                    .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm) \
+                    .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.IsValid == True) \
                     .scalar()
 
                 # Recupera tutti gli ID degli appelli associati ai test

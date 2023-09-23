@@ -45,7 +45,7 @@ Sustains = Base.classes.Sustains
 @app_studentAppeal.route('/showAllAppeals')
 @login_required
 def showAllAppeals():
-    if current_user.is_authenticated and current_user.role == 'student':
+    if current_user.is_authenticated:
         # Gli appelli a cui sono già iscritto
         myAppeal_ids = session.query(Sustains.IdAppeal).filter(current_user.id == Sustains.IdStudent)
 
@@ -77,7 +77,7 @@ def showAllAppeals():
 @app_studentAppeal.route('/showMyAppeals')
 @login_required
 def showMyAppeals():
-    if current_user.is_authenticated and current_user.role == 'student':
+    if current_user.is_authenticated:
         # Gli appelli a cui sono già iscritto
         myAppeal_ids = session.query(Sustains).filter(current_user.id == Sustains.IdStudent)
 
@@ -124,7 +124,7 @@ def showMyAppeals():
 @app_studentAppeal.route('/showMyEnrolledExam')
 @login_required
 def showMyEnrolledExam():
-    if current_user.is_authenticated and current_user.role == 'student':
+    if current_user.is_authenticated:
         myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
         coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
         return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo)
@@ -135,7 +135,7 @@ def showMyEnrolledExam():
 @app_studentAppeal.route('/enrollStudentAppeal', methods=['GET', 'POST'])
 @login_required
 def enrollStudentAppeal():
-    if current_user.is_authenticated and current_user.role == 'student':
+    if current_user.is_authenticated:
         IdAppealForm = int(request.form["IdAppeal"])
         today = date.today()
 
