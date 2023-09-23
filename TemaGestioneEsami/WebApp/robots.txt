@@ -1,1 +1,34 @@
-Qua metteremo le pagine da indicizzare
+#Qua metteremo le pagine da indicizzare
+
+User-agent: *
+Disallow: /admin
+
+User-agent: Googlebot
+Disallow:
+
+User-agent: Bingbot
+Disallow:
+
+Allow: /Exam_manager/error.html
+Allow: /Exam_manager/home.html
+Allow: /Exam_manager/login.html
+Allow: /Exam_manager/studentArea.html
+Allow: /Exam_manager/studentInfoAcc.html
+Allow: /Exam_manager/studentRegistration.html
+Allow: /Exam_manager/studentShowAllAppeal.html
+Allow: /Exam_manager/studentShowAllExam.html
+Allow: /Exam_manager/studentShowAllExamTests.html
+Allow: /Exam_manager/studentShowMyAppealReservation.html
+Allow: /Exam_manager/studentShowMyEnrolledExams.html
+Allow: /Exam_manager/teacherArea.html
+Allow: /Exam_manager/teacherExamRegistration.html
+Allow: /Exam_manager/teacherGiveValutation.html
+Allow: /Exam_manager/teacherInfoAcc.html
+Allow: /Exam_manager/teacherRegistration.html
+Allow: /Exam_manager/teacherRegistrationAppeal.html
+Allow: /Exam_manager/teacherRegistrationTest.html
+Allow: /Exam_manager/teacherShowMyAppeal.html
+Allow: /Exam_manager/teacherShowMyEnrolledStudents.html
+Allow: /Exam_manager/teacherShowMyExams.html
+Allow: /Exam_manager/teacherShowMyTests.html
+Allow: /Exam_manager/teacherUpdateTests.html
