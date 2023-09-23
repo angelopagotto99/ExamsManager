@@ -3,7 +3,7 @@
 
 INDICIZZAZIONE DELLE PAGINE:(Samu)
 1. Pagine da indicizzare(usare file robots.txt);
-2. Definire indici su Tabelle;
+2. Definire indici su Tabelle; (fatto)
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ FRONT-END e BACK-END: (Angelo)
 8. Sistemare inoltre le seguenti cose:
 
     - Bug visualizzazione degli appelli disponibili lato studente(ne vengono fuori a bizzeffe);(fatto)
-    - Non appare il tasto "crea appello" quando il counter del numero di test ha raggiunto la soglia;
+    - Non appare il tasto "crea appello" quando il counter del numero di test ha raggiunto la soglia; (non fatto)
     - Ottimizzare la visualizzazione delle informazioni lato front end (info più carine);(fatto)
     - Sistemare / Aggiungere altri collegamenti alle pagine;(fatto)
 

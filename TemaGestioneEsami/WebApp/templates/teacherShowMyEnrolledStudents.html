@@ -114,8 +114,9 @@
                   <tr>
                     <th class="w-auto" scope="row"></th>
                     <td class="w-50">{{ v.Surname }} {{ v.Name }}</td>
+                    {% if s.IdStudent == v.Id %}
                     <td class="w-50"> {{ s.Valutation }} </td>
-
+                    {% endif %}
                     <td class="w-50">{{ v.Email }}</td>
                     <td>
 

@@ -12,6 +12,7 @@ import random
 from imghdr import tests
 
 from sqlalchemy import *
+from sqlalchemy.orm import aliased
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
@@ -44,7 +45,6 @@ Appeals = Base.classes.ExamAppeals
 Sustains = Base.classes.Sustains
 
 
-# ...
 @app_teacherValutation.route('/newValutation', methods=['GET', 'POST'])
 @login_required
 def newValutationPartial():
@@ -65,8 +65,8 @@ def newValutationPartial():
             session.query(Sustains).filter(
                     and_(Sustains.IdStudent == IdStudentForm, Sustains.IdAppeal == IdAppealForm)).update(
                     {Sustains.Valutation: ValutationForm})
-            AllStudents = session.query(Sustains , Students).filter(
-                and_(Sustains.IdAppeal == IdAppealForm,Sustains.IdStudent==IdStudentForm, Teachers.Faculty == Students.Faculty)).order_by(Students.Email)
+            AllStudents = session.query(Sustains, Students).filter(
+                and_(Sustains.IdAppeal == IdAppealForm, Sustains.IdStudent == Students.Id, Teachers.Faculty == Students.Faculty)).order_by(Students.Email)
             session.commit()  # conferma le modifiche
             return render_template('teacherShowMyEnrolledStudents.html', IdAppeal=IdAppealForm, IdStudent=IdStudentForm,myStudents=AllStudents,
                                        IdValutations=myValutations)
@@ -75,6 +75,7 @@ def newValutationPartial():
             return redirect('/newValutation')
     else:
         return redirect('/')
+
 
 
 
@@ -141,8 +142,10 @@ def newValutationFinal():
 
                     # Creare un dizionario per memorizzare le valutazioni dei test dello studente
                     student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
-                    return render_template('studentShowAllExamTests.html', student_test_grades=student_test_grades,
-                                           IdExam=IdExamForm, myTest=myTest)
+                    myCourses = session.query(EnrolledStudents.IdExam).filter(current_user.id == EnrolledStudents.IdStudent)
+                    coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
+                    myVal = session.query(EnrolledStudents).filter(current_user.id == EnrolledStudents.IdStudent)
+                    return render_template('studentShowMyEnrolledExams.html',  myCourses=coursesInfo, myVal=myVal)
 
             else:
                 myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
