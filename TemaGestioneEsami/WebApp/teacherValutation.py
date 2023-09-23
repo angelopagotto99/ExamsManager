@@ -52,7 +52,7 @@ def newValutationPartial():
     IdStudentForm = int(request.form["IdStudent"])
     IdAppealForm = int(request.form["IdAppeal"])
 
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         if request.method == 'POST':
             # controllo sul titolo del corso
             # Verifica se esiste già una riga con Valutation non NULL per lo studente e l'appello specificato
@@ -84,7 +84,7 @@ def newValutationPartial():
 def newValutationFinal():
     IdExamForm = int(request.form["IdExam"])
 
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         if request.method == 'POST':
             student_enrollment = session.query(EnrolledStudents).filter(
                 EnrolledStudents.IdStudent == current_user.id,

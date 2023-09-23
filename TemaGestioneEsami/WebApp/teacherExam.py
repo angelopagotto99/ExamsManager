@@ -58,7 +58,7 @@ def newExam():
     CFUForm = int(request.form["CFU"])
     ValTypeForm = request.form["type"]
 
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         if request.method == 'POST':
             # controllo sul titolo del corso
             usedTitle = session.query(Exams.Id).filter(Exams.ExamName == ExamForm).first()
@@ -96,7 +96,7 @@ def newExam():
 @app_teacherExam.route('/showAllTeacherExam')
 @login_required
 def showAllTeacherExam():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         # Mostra tutti i corsi del docente corrente
         if current_user.is_authenticated:
             # Mostra tutti i corsi del docente corrente, includendo il numero di test creati per ciascun esame
@@ -139,7 +139,7 @@ def showAllTeacherExam():
 # tengo o non tengo traccia delle prenotazioni dello studente relative all' esame?
 @app_teacherExam.route('/unenrollExam', methods=['GET', 'POST'])
 def unenrollExam():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         IdExamForm = int(request.form["IdExam"])
         # Rimuovi gli studenti iscritti all'esame
         is_enrolled_subquery = session.query(isEnrolled.IdStudent).filter(isEnrolled.IdExam == IdExamForm).subquery()
@@ -174,7 +174,7 @@ def unenrollExam():
 # mostra tutti i test creati per un certo esame
 @app_teacherExam.route('/showTeacherTests', methods=['GET', 'POST'])
 def showTeacherTests():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         # Mostra tutti test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 

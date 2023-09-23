@@ -256,7 +256,7 @@ def newTeacher():
 #mostro le info del docente attualmente loggato
 @app.route('/showTeacherInfo',methods=['GET', 'POST'])
 def showTeacherInfo():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         teachers = session.query(Teachers).filter(Teachers.Id == current_user.id).first()
         teacherInfo = session.query(Teachers.Name, Teachers.Surname, Teachers.Telephone, Teachers.Email).filter(and_(Teachers.Id == current_user.id)).first()
         return render_template('teacherInfoAcc.html', teacher=teachers, teacherInfo=teacherInfo)

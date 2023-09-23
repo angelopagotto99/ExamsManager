@@ -45,7 +45,7 @@ Sustains = Base.classes.Sustains
 @app_studentExam.route('/showAllCourses')
 @login_required
 def showAllCourses():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'student':
         # tutti i corsi esistenti
         allCourses = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.CFU, Exams.Faculty,
                                    Exams.IdTeacher)
@@ -75,7 +75,7 @@ def showAllCourses():
 
 @app_studentExam.route('/showAllExamTest', methods=['GET', 'POST'])
 def showAllExamTest():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         # Mostra tutti i test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 
@@ -111,7 +111,7 @@ def showAllExamTest():
 @app_studentExam.route('/showMyEnrolledExam')
 @login_required
 def showMyEnrolledExam():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
         coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
         myVal = session.query(isEnrolled).filter(current_user.id == isEnrolled.IdStudent)
@@ -124,7 +124,7 @@ def showMyEnrolledExam():
 @app_studentExam.route('/enrollStudent', methods=['GET', 'POST'])
 @login_required
 def enrollStudent():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
             IdExamForm = int(request.form["IdExam"])
 
             # Controlla se lo studente è già iscritto all'esame
@@ -148,7 +148,7 @@ def enrollStudent():
 @app_studentExam.route('/unenrollExam', methods=['GET', 'POST'])
 @login_required
 def unenrollExam():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         try:
             IdExamForm = int(request.form["IdExam"])
 
@@ -172,7 +172,7 @@ def unenrollExam():
 # mostra tutti i test creati per un certo esame
 @app_studentExam.route('/showTeacherTests', methods=['GET', 'POST'])
 def showTeacherTests():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.role == 'teacher':
         # Mostra tutti test dell'esame del docente corrente
         IdExamForm = int(request.form["IdExam"])
 
