@@ -57,7 +57,7 @@ def showAllAppeals():
             .join(Tests, Appeals.IdTest == Tests.Id) \
             .join(Exams, Tests.IdExam == Exams.Id) \
             .outerjoin(Sustains, Sustains.IdAppeal == Appeals.Id) \
-            .filter(Tests.Id == Appeals.IdTest,Exams.Faculty == Students.Faculty, Appeals.Id.notin_(myAppeal_ids)) \
+            .filter(Tests.Id == Appeals.IdTest,Students.Id == current_user.id, Exams.Faculty == Students.Faculty, Appeals.Id.notin_(myAppeal_ids)) \
             .group_by(Appeals.Id, Exams.Id, Tests.Id) \
             .order_by(Tests.TestName, Appeals.ExamData) \
             .all()
