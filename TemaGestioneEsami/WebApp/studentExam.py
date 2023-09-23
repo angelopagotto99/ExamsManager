@@ -50,10 +50,10 @@ def showAllCourses():
         allCourses = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.CFU, Exams.Faculty,
                                    Exams.IdTeacher)
         # i corsi a cui sono già iscritto
-        myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent, Students.Faculty == Exams.Faculty)
+        myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
         # lista dei corsi a cui posso iscrivermi
         displayCourses = session.query(Exams.Id, Exams.ExamName, Exams.Description, Exams.nTest, Exams.CFU, Exams.Faculty,
-                                       Exams.IdTeacher).filter(Exams.Id.notin_(myCourses))
+                                       Exams.IdTeacher).filter(Exams.Id.notin_(myCourses), Students.Id == current_user.id, Students.Faculty == Exams.Faculty)
 
         # numero d'iscrizioni fatte per ciascun corso
         nEnrollmentsGroup = \

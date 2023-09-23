@@ -235,7 +235,7 @@ def newTeacher():
         if not is_password_complex(pwdForm):
             return render_template('teacherRegistration.html', error="pwd")
 
-        if facultyForm not in ['Informatica', 'Scienze ambientali', 'Umanistica']:
+        if facultyForm not in ['Informatica', 'Scienze Ambientali', 'Umanistica']:
             return render_template('teacherRegistration.html', error="faculty")
 
         newTeacher = Teachers(
