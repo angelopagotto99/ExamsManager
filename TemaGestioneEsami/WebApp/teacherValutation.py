@@ -83,74 +83,85 @@ def newValutationPartial():
 @login_required
 def newValutationFinal():
     IdExamForm = int(request.form["IdExam"])
-
+    DecisionForm = request.form["accept"]
     if current_user.is_authenticated:
         if request.method == 'POST':
             student_enrollment = session.query(EnrolledStudents).filter(
                 EnrolledStudents.IdStudent == current_user.id,
                 EnrolledStudents.IdExam == IdExamForm
             ).first()
+            myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
+            myCourses = session.query(EnrolledStudents.IdExam).filter(current_user.id == EnrolledStudents.IdStudent)
+            coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
+            myVal = session.query(EnrolledStudents).filter(current_user.id == EnrolledStudents.IdStudent)
+            average_valutation = session.query(func.avg(Sustains.Valutation)) \
+                .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+                .join(Tests, Appeals.IdTest == Tests.Id) \
+                .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True,
+                        Sustains.Valutation != None) \
+                .scalar()
+            if DecisionForm == "ACCETTO":
+                if student_enrollment:
+                    exam = session.query(Exams).filter(Exams.Id == IdExamForm).first()
 
-            if student_enrollment:
-                exam = session.query(Exams).filter(Exams.Id == IdExamForm).first()
+                    # Calcola la media dei voti dei risultati degli appelli
+                    # ottenuti dallo studente per i test previsti dall'esame
+                    average_valutation = session.query(func.avg(Sustains.Valutation)) \
+                        .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+                        .join(Tests, Appeals.IdTest == Tests.Id) \
+                        .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True, Sustains.Valutation != None) \
+                        .scalar()
 
-                # Calcola la media dei voti dei risultati degli appelli
-                # ottenuti dallo studente per i test previsti dall'esame
-                average_valutation = session.query(func.avg(Sustains.Valutation)) \
-                    .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
-                    .join(Tests, Appeals.IdTest == Tests.Id) \
-                    .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.IsValid == True) \
-                    .scalar()
+                    # Recupera tutti gli ID degli appelli associati ai test
+                    myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
+                    test_ids = [test.Id for test in myTest]
+                    myAppeal = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids)).all()
+                    appeal_ids = [appeal.Id for appeal in myAppeal]
 
-                # Recupera tutti gli ID degli appelli associati ai test
-                myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
-                test_ids = [test.Id for test in myTest]
-                myAppeal = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids)).all()
-                appeal_ids = [appeal.Id for appeal in myAppeal]
+                    if average_valutation is not None:
+                        average_valutation = round(average_valutation, 2)
 
-                if average_valutation is not None:
-                    average_valutation = round(average_valutation, 2)
+                        # Controlla se tutti i voti dei test sono diversi da null
+                        all_tests_graded = session.query(Sustains).filter(
+                            and_(Sustains.IdStudent == current_user.id, Sustains.IdAppeal.in_(appeal_ids)),
+                            Sustains.Valutation.is_(None)
+                        ).count() == 0
 
-                    # Controlla se tutti i voti dei test sono diversi da null
-                    all_tests_graded = session.query(Sustains).filter(
-                        and_(Sustains.IdStudent == current_user.id, Sustains.IdAppeal.in_(appeal_ids)),
-                        Sustains.Valutation.is_(None)
-                    ).count() == 0
+                        # Controlla se la media dei voti è compresa tra 18 e 30
+                        is_average_valid = 18 <= average_valutation <= 30
 
-                    # Controlla se la media dei voti è compresa tra 18 e 30
-                    is_average_valid = 18 <= average_valutation <= 30
+                        # Controllo sulla data di scadenza
+                        current_date = datetime.now()
+                        is_valid_date = all(datetime.strptime(appeal.ValutationExpireData, '%Y-%m-%dT%H:%M') >= current_date for appeal in myAppeal)
 
-                    # Controllo sulla data di scadenza
-                    current_date = datetime.now()
-                    is_valid_date = all(datetime.strptime(appeal.ValutationExpireData, '%Y-%m-%dT%H:%M') >= current_date for appeal in myAppeal)
+                        # Aggiorna la tabella EnrolledStudents con le prime due cifre decimali della media calcolata
+                        if all_tests_graded and is_average_valid and not exam.isIdoneo and is_valid_date:
+                            student_enrollment.Valutation = average_valutation
+                            session.commit()
+                        else:
+                            student_enrollment.Valutation = "IDONEITA'"
+                            session.commit()
 
-                    # Aggiorna la tabella EnrolledStudents con le prime due cifre decimali della media calcolata
-                    if all_tests_graded and is_average_valid and not exam.isIdoneo and is_valid_date:
-                        student_enrollment.Valutation = average_valutation
-                        session.commit()
-                    else:
-                        student_enrollment.Valutation = "IDONEITA'"
-                        session.commit()
+                        # Query per recuperare le informazioni sugli esami associati all'esame
+                        testInfo = session.query(Exams).filter(Exams.Id == IdExamForm).first()
 
-                    # Query per recuperare le informazioni sugli esami associati all'esame
-                    testInfo = session.query(Exams).filter(Exams.Id == IdExamForm).first()
+                        # Query per recuperare le valutazioni dello studente per i test
+                        student_valutations = session.query(Sustains).filter(
+                            and_(Sustains.IdStudent == current_user.id, Sustains.IdAppeal.in_(appeal_ids))
+                        ).all()
 
-                    # Query per recuperare le valutazioni dello studente per i test
-                    student_valutations = session.query(Sustains).filter(
-                        and_(Sustains.IdStudent == current_user.id, Sustains.IdAppeal.in_(appeal_ids))
-                    ).all()
+                        # Creare un dizionario per memorizzare le valutazioni dei test dello studente
+                        student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
+                        myCourses = session.query(EnrolledStudents.IdExam).filter(current_user.id == EnrolledStudents.IdStudent)
+                        coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
+                        myVal = session.query(EnrolledStudents).filter(current_user.id == EnrolledStudents.IdStudent)
+                        return render_template('studentShowMyEnrolledExams.html',  myCourses=coursesInfo, myVal=myVal, decisione=DecisionForm, media=average_valutation)
 
-                    # Creare un dizionario per memorizzare le valutazioni dei test dello studente
-                    student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
-                    myCourses = session.query(EnrolledStudents.IdExam).filter(current_user.id == EnrolledStudents.IdStudent)
-                    coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
-                    myVal = session.query(EnrolledStudents).filter(current_user.id == EnrolledStudents.IdStudent)
-                    return render_template('studentShowMyEnrolledExams.html',  myCourses=coursesInfo, myVal=myVal)
-
+                else:
+                    myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
+                    return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
             else:
-                myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
-                return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
-
+                return render_template('studentShowMyEnrolledExams.html', IdExam= IdExamForm, myCourses=coursesInfo, myVal=myVal, decision=DecisionForm, media=average_valutation)
     else:
         myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
         return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
@@ -158,6 +169,21 @@ def newValutationFinal():
     return redirect('/newValutationFinal')
 
 
+@app_teacherValutation.route('/seeVal', methods=['GET', 'POST'])
+@login_required
+
+def seeVal():
+    if current_user.is_authenticated:
+        # Mostra tutti test dell'esame del docente corrente
+        IdExamForm = int(request.form["IdExam"])
+        average_valutation = session.query(func.avg(Sustains.Valutation)) \
+            .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+            .join(Tests, Appeals.IdTest == Tests.Id) \
+            .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True, Sustains.Valutation != None) \
+            .scalar()
+        return render_template('FinalValutation.html', IdExam=IdExamForm, media=average_valutation)
+    else:
+        return redirect('/')
 
 
 

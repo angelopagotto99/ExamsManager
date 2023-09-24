@@ -124,10 +124,14 @@
 
               </tbody>
             </table>
-          <form action='/newValutationFinal' method="POST" class="d-inline">
-                <input type="hidden" id="Id"name="IdExam" value="{{ IdExam }}">
+          {% if media %}
+            {% if media >=18 or media<=30 %}
+          <form action='/seeVal' method="POST" class="d-inline">
+                <input type="hidden" id="Id" name="IdExam" value="{{ IdExam }}">
                 <button type="submit" class="btn btn-outline-dark">VOTO FINALE</button>
               </form>
+            {% endif %}
+          {% endif %}
           <p class="lead">
               <a href='/showMyEnrolledExam' class="btn btn-lg btn-danger border-white bg-blue">Torna indietro</a>
             </p>

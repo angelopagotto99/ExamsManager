@@ -103,7 +103,9 @@
                   <th scope="col">Numero dei test</th>
                   <th scope="col">Status (Passato/Non Passato)</th>
                   <th scope="col">Crediti Formativi(CFU)</th>
+                  {% if media is none %}
                   <th scope="col">Azioni</th>
+                  {% endif %}
                 </tr>
               </thead>
               <tbody>
@@ -124,16 +126,40 @@
                       {% endfor %}
                     </td>
                     <td class="w-50">{{ c.CFU }}</td>
+                    {% if media is none %}
+                      <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
+                        <span class="col-md-auto display-inlineblock">
+                          <form action='/showAllExamTest' method="POST" class="d-inline">
+                            <input type="hidden" name="IdExam" value="{{ c.Id }}">
+                            <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
+                          </form>
+
+                        </span>
+                      </td>
+                    {% else %}
+                    {% if media <=18%}
                     <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
-                      <span class="col-md-auto display-inlineblock">
+                        <span class="col-md-auto display-inlineblock">
+                          <form action='/showAllExamTest' method="POST" class="d-inline">
+                            <input type="hidden" name="IdExam" value="{{ c.Id }}">
+                            <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
+                          </form>
 
-                        <form action='/showAllExamTest' method="POST" class="d-inline">
-                          <input type="hidden" name="IdExam" value="{{ c.Id }}">
-                          <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
-                        </form>
+                        </span>
+                      </td>
+                      {% endif %}
+                    {% if media >=18 and decisione=="RIFIUTO" %}
+                    <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
+                        <span class="col-md-auto display-inlineblock">
+                          <form action='/showAllExamTest' method="POST" class="d-inline">
+                            <input type="hidden" name="IdExam" value="{{ c.Id }}">
+                            <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
+                          </form>
 
-                      </span>
-                    </td>
+                        </span>
+                      </td>
+                      {% endif %}
+                    {% endif %}
                   </tr>
                 {% endfor %}
               </tbody>

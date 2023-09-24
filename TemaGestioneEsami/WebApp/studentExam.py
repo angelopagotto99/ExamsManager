@@ -102,9 +102,16 @@ def showAllExamTest():
 
         # Creare un dizionario per memorizzare le valutazioni dei test dello studente
         student_test_grades = {valutation.IdAppeal: valutation.Valutation for valutation in student_valutations}
+        myVal = session.query(isEnrolled).filter(current_user.id == isEnrolled.IdStudent)
+        average_valutation = session.query(func.avg(Sustains.Valutation)) \
+            .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+            .join(Test, Appeals.IdTest == Test.Id) \
+            .filter(Sustains.IdStudent == current_user.id, Test.IdExam == IdExamForm, Sustains.isValid == True,
+                    Sustains.Valutation != None) \
+            .scalar()
 
         return render_template('studentShowAllExamTests.html', myTest=myTest, myAppeal=myAppeal,
-                               exam=testInfo, myVal=student_valutations, student_test_grades=student_test_grades, IdExam=IdExamForm)
+                               exam=testInfo, myVal=student_valutations, student_test_grades=student_test_grades, IdExam=IdExamForm, media=average_valutation)
     else:
         return redirect('/')
 
@@ -115,9 +122,14 @@ def showMyEnrolledExam():
         myCourses = session.query(isEnrolled.IdExam).filter(current_user.id == isEnrolled.IdStudent)
         coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
         myVal = session.query(isEnrolled).filter(current_user.id == isEnrolled.IdStudent)
+        average_valutation = session.query(func.avg(Sustains.Valutation)) \
+            .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+            .join(Test, Appeals.IdTest == Test.Id) \
+            .filter(Sustains.IdStudent == current_user.id, Test.IdExam == Exams.Id, Sustains.isValid == True,
+                    Sustains.Valutation != None) \
+            .scalar()
 
-
-        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo, myVal=myVal)
+        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo, myVal=myVal, media=average_valutation)
     else:
         return redirect('/')
 
