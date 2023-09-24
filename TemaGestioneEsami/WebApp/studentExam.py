@@ -24,7 +24,7 @@ from datetime import date
 app_studentExam = Blueprint('app_studentExam', __name__)
 
 # creazione dell'engine
-engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:', echo=True)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)

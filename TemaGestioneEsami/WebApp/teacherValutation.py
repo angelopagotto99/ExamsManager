@@ -26,7 +26,7 @@ app_teacherValutation = Blueprint('app_teacherValutation', __name__)
 
 
 # creazione dell'engine - inserisci le credenziali in modo sicuro
-engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:', echo=True)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)

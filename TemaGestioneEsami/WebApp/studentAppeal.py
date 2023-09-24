@@ -24,7 +24,7 @@ from sqlalchemy.orm import joinedload
 app_studentAppeal = Blueprint('app_studentAppeal', __name__)
 
 # creazione dell'engine
-engine = create_engine('postgresql+pg8000://postgres:Angelo99@localhost:5432/Exams_Manager', echo=True)
+engine = create_engine('postgresql+pg8000://postgres:', echo=True)
 
 # creazione della sessione
 Session = sessionmaker(bind=engine)
