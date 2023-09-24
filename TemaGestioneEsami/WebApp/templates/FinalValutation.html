@@ -88,17 +88,11 @@
           <form action='/newValutationFinal' method="POST">
 
             <div class="mb-3">
-              <label for="exampleInputEmail1" class="form-label">Scegli tra ACCETTA o RIFIUTA<span class="text-danger">*</span></label>
+              <label for="exampleInputEmail1" class="form-label">Digita ACCETTO o RIFIUTO <span class="text-danger">*</span></label>
               {% if error is not defined %}
-                <select name="accept" class="form-control" id="exampleInputEmail11" required value="{{ accept }}">
-                  <option accept="ACCETTA">ACCETTA</option>
-                  <option accept="RIFIUTA">RIFIUTA</option>
-                </select>
+                <input name="accept" type="text" class="form-control" required>
               {% else %}
-                <select name="accept" class="form-control" id="exampleInputEmail12" required value="{{ accept }}">
-                  <option accept="ACCETTA" {% if type =='ACCETTA' %} selected {% endif %}>ACCETTA</option>
-                  <option accept="RIFIUTA" {% if type =='RIFIUTA' %} selected {% endif %}>RIFIUTA</option>
-                </select>
+                <input name="accept" type="text" class="form-control" required value="{{ accept }}">
               {% endif %}
             </div>
 

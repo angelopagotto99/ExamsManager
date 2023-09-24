@@ -91,6 +91,7 @@ def newValutationFinal():
     DecisionForm = request.form["accept"]
     if current_user.is_authenticated:
         if request.method == 'POST':
+
             student_enrollment = session.query(EnrolledStudents).filter(
                 EnrolledStudents.IdStudent == current_user.id,
                 EnrolledStudents.IdExam == IdExamForm
@@ -105,8 +106,7 @@ def newValutationFinal():
                 .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True,
                         Sustains.Valutation != None) \
                 .scalar()
-            if DecisionForm == "ACCETTO":
-                if student_enrollment:
+            if student_enrollment:
                     exam = session.query(Exams).filter(Exams.Id == IdExamForm).first()
 
                     # Calcola la media dei voti dei risultati degli appelli
@@ -114,7 +114,13 @@ def newValutationFinal():
                     average_valutation = session.query(func.avg(Sustains.Valutation)) \
                         .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
                         .join(Tests, Appeals.IdTest == Tests.Id) \
-                        .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True, Sustains.Valutation != None) \
+                        .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True, Tests.ValType == 'Esame',Sustains.Valutation != None) \
+                        .scalar()
+
+                    sum_bonus = session.query(func.sum(Sustains.Valutation)) \
+                        .join(Appeals, Sustains.IdAppeal == Appeals.Id) \
+                        .join(Tests, Appeals.IdTest == Tests.Id) \
+                        .filter(Sustains.IdStudent == current_user.id, Tests.IdExam == IdExamForm, Sustains.isValid == True, Tests.ValType == 'Bonus',Sustains.Valutation != None) \
                         .scalar()
 
                     # Recupera tutti gli ID degli appelli associati ai test
@@ -124,7 +130,7 @@ def newValutationFinal():
                     appeal_ids = [appeal.Id for appeal in myAppeal]
 
                     if average_valutation is not None:
-                        average_valutation = round(average_valutation, 2)
+                        average_valutation = round(average_valutation+sum_bonus, 2)
 
                         # Controlla se tutti i voti dei test sono diversi da null
                         all_tests_graded = session.query(Sustains).filter(
@@ -141,11 +147,19 @@ def newValutationFinal():
 
                         # Aggiorna la tabella EnrolledStudents con le prime due cifre decimali della media calcolata
                         if all_tests_graded and is_average_valid and not exam.isIdoneo and is_valid_date:
-                            student_enrollment.Valutation = average_valutation
-                            session.commit()
+                            if DecisionForm == "ACCETTO":
+                                student_enrollment.Valutation = average_valutation+sum_bonus
+                                session.commit()
+                            else:
+                                student_enrollment.Valutation = None
+                                session.commit()
                         else:
-                            student_enrollment.Valutation = "IDONEITA'"
-                            session.commit()
+                            if DecisionForm == "ACCETTO":
+                                student_enrollment.Valutation ='IDONEITA'
+                                session.commit()
+                            else:
+                                student_enrollment.Valutation = 'NON IDONEO'
+                                session.commit()
 
                         # Query per recuperare le informazioni sugli esami associati all'esame
                         testInfo = session.query(Exams).filter(Exams.Id == IdExamForm).first()
@@ -160,13 +174,12 @@ def newValutationFinal():
                         myCourses = session.query(EnrolledStudents.IdExam).filter(current_user.id == EnrolledStudents.IdStudent)
                         coursesInfo = session.query(Exams).filter(Exams.Id.in_(myCourses)).order_by(Exams.ExamName)
                         myVal = session.query(EnrolledStudents).filter(current_user.id == EnrolledStudents.IdStudent)
-                        return render_template('studentShowMyEnrolledExams.html',  myCourses=coursesInfo, myVal=myVal, decisione=DecisionForm, media=average_valutation)
+                    return render_template('studentShowMyEnrolledExams.html',  myCourses=coursesInfo, myVal=myVal, decisione=DecisionForm, media=average_valutation)
 
-                else:
-                    myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
-                    return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
             else:
-                return render_template('studentShowMyEnrolledExams.html', IdExam= IdExamForm, myCourses=coursesInfo, myVal=myVal, decision=DecisionForm, media=average_valutation)
+                        myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
+                        return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
+
     else:
         myTest = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName).all()
         return render_template('studentShowAllExamTests.html', error="studente non presente", IdExam=IdExamForm, myTest=myTest)
