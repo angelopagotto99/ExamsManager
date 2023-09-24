@@ -20,6 +20,7 @@ from flask import Flask, Blueprint, render_template, redirect, request
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date, datetime
 from flask import Flask, flash, redirect, render_template, request, url_for
+from sqlalchemy.exc import ProgrammingError
 
 # mantiene il collegamento con l'app principale mainPage
 app_teacherValutation = Blueprint('app_teacherValutation', __name__)

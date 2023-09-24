@@ -128,8 +128,10 @@ def showMyEnrolledExam():
             .filter(Sustains.IdStudent == current_user.id, Test.IdExam == Exams.Id, Sustains.isValid == True,
                     Sustains.Valutation != None) \
             .scalar()
+        final= session.query(isEnrolled.Valutation).filter(current_user.id == isEnrolled.IdStudent, isEnrolled.IdExam == Exams.Id)
 
-        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo, myVal=myVal, media=average_valutation)
+        return render_template('studentShowMyEnrolledExams.html', myCourses=coursesInfo, myVal=myVal, media=average_valutation, final=final)
+
     else:
         return redirect('/')
 
