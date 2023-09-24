@@ -14,7 +14,7 @@ import string
 import random
 from sqlalchemy import create_engine, and_, func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, aliased
 from flask import Flask, Blueprint, render_template, redirect, request, app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from datetime import date, datetime
@@ -147,19 +147,7 @@ def newAppeal():
                 session.add(new_exam_appeal)
                 session.commit()
 
-                AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest, Appeals.ValutationExpireData).filter(
-                    Appeals.IdTest == idTests.Id)
-
-                testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
-                tests = session.query(Tests, Exams.nTest).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
-
-                # Recupera tutti gli id dei test associati all'esame
-                test_ids = [test.Id for test in tests]
-                AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
-                # Recupera le date degli appelli per ciascun test
-                AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == IdExamForm)
-                nTest = session.query(Exams).filter(Exams.Id == IdExamForm, Tests.IdExam == IdExamForm)
-                return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=checkUsedDate, IdExam=IdExamForm, myCourses=AllExams,nTest=nTest, myAppeal=AllAppealData, myTest=tests)
+                return render_template('teacherArea.html', name=current_user.name,surname=current_user.surname)
 
         else:
             return redirect('/newAppeal')
@@ -200,6 +188,7 @@ def deleteCurrentTest():
             tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
             dates = session.query(Appeals).filter(Appeals.IdTest == IdTestForm).order_by(Appeals.ExamData)
 
+            session.query(Sustains).filter(Sustains.IdAppeal == Appeals.Id).delete(synchronize_session='fetch')
             session.query(Appeals).filter(Appeals.IdTest == IdTestForm).delete()
             session.query(Tests).filter(and_(Tests.IdExam == IdExamForm, Tests.Id == IdTestForm)).delete()
 
@@ -207,7 +196,7 @@ def deleteCurrentTest():
 
             AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == IdExamForm)
 
-            return render_template('teacherShowMyTests.html', IdExam=IdExamForm, myTest=tests, myAppeal=dates, myExam=AllExams)
+            return render_template('teacherArea.html', name=current_user.name, surname=current_user.surname)
     else:
         return redirect('/')
 

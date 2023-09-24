@@ -136,8 +136,8 @@
 
                         </span>
                       </td>
-                    {% else %}
-                    {% if media <=18%}
+                    {% endif %}
+                    {% if media <=18 %}
                     <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
                         <span class="col-md-auto display-inlineblock">
                           <form action='/showAllExamTest' method="POST" class="d-inline">
@@ -147,7 +147,7 @@
 
                         </span>
                       </td>
-                      {% endif %}
+                    {% endif %}
                     {% if media >=18 and decisione=="RIFIUTO" %}
                     <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
                         <span class="col-md-auto display-inlineblock">
@@ -159,7 +159,18 @@
                         </span>
                       </td>
                       {% endif %}
-                    {% endif %}
+                    {% if media >=18 and decisione is none %}
+                    <td class="w-auto d-grid gap-2 d-md-flex justify-content-md-end">
+                        <span class="col-md-auto display-inlineblock">
+                          <form action='/showAllExamTest' method="POST" class="d-inline">
+                            <input type="hidden" name="IdExam" value="{{ c.Id }}">
+                            <button type="submit" class="btn btn-outline-dark">MOSTRA TEST</button>
+                          </form>
+
+                        </span>
+                      </td>
+                      {% endif %}
+
                   </tr>
                 {% endfor %}
               </tbody>
