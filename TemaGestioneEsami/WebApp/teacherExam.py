@@ -98,9 +98,8 @@ def newExam():
 def showAllTeacherExam():
     if current_user.is_authenticated:
         # Mostra tutti i corsi del docente corrente
-        if current_user.is_authenticated:
             # Mostra tutti i corsi del docente corrente, includendo il numero di test creati per ciascun esame
-            AllExams = session.query(Exams.Id,
+        AllExams = session.query(Exams.Id,
                                      Exams.ExamName,
                                      Exams.Description,
                                      Exams.nTest,
@@ -188,8 +187,10 @@ def showTeacherTests():
         test_ids = [test.Id for test in tests]
         AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
         # Recupera le date degli appelli per ciascun test
+        tests1 = session.query(Test).filter(Test.IdExam == IdExamForm).order_by(Test.TestName).count()
         AllExams = session.query(Exams.Id, Exams.nTest).filter(Test.IdExam == IdExamForm)
-        return render_template('teacherShowMyTests.html', myTest=tests, myAppeal=AllAppealData, test=tests, exam=testInfo,myExam=AllExams)
+        nTest = session.query(Exams.nTest).filter(Test.IdExam==IdExamForm)
+        return render_template('teacherShowMyTests.html', myTest=tests, myAppeal=AllAppealData, exam=testInfo,myExam=AllExams,nTest=nTest)
     else:
         return redirect('/')
 

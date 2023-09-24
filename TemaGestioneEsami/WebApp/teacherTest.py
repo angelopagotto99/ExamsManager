@@ -48,7 +48,7 @@ Sustains = Base.classes.Sustains
 @app_teacherTest.route('/newTest', methods=['GET', 'POST'])
 @login_required
 def newTest():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         if request.method == 'POST':
                 IdExamForm = int(request.form["IdExam"])
                 NameForm = request.form["name"]
@@ -109,7 +109,7 @@ def newTest():
 @app_teacherTest.route('/newAppeal', methods=['GET', 'POST'])
 @login_required
 def newAppeal():
-    if current_user.is_authenticated and current_user.role == 'teacher':
+    if current_user.is_authenticated:
         if request.method == 'POST':
                 IdExamForm = int(request.form["IdExam"])
                 IdTestForm = int(request.form["IdTest"])
@@ -144,9 +144,16 @@ def newAppeal():
                 AllAppealData = session.query(Appeals.Id, Appeals.ExamData, Appeals.IdTest, Appeals.ValutationExpireData).filter(
                     Appeals.IdTest == idTests.Id)
 
-                tests = session.query(Tests).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
+                testInfo = session.query(Exams).filter(Exams.Id == IdExamForm)
+                tests = session.query(Tests, Exams.nTest).filter(Tests.IdExam == IdExamForm).order_by(Tests.TestName)
 
-                return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=checkUsedDate, IdExam=IdExamForm, myCourses=AllExams, myAppeal=AllAppealData, myTest=tests)
+                # Recupera tutti gli id dei test associati all'esame
+                test_ids = [test.Id for test in tests]
+                AllAppealData = session.query(Appeals).filter(Appeals.IdTest == test_ids)
+                # Recupera le date degli appelli per ciascun test
+                AllExams = session.query(Exams.Id, Exams.nTest).filter(Tests.IdExam == IdExamForm)
+                nTest = session.query(Exams).filter(Exams.Id == IdExamForm, Tests.IdExam == IdExamForm)
+                return render_template('teacherShowMyTests.html', IdTest=idTests, checkUsedDate=checkUsedDate, IdExam=IdExamForm, myCourses=AllExams,nTest=nTest, myAppeal=AllAppealData, myTest=tests)
 
         else:
             return redirect('/newAppeal')
