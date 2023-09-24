@@ -52,10 +52,10 @@ CREATE OR REPLACE FUNCTION controlloValiditàAppello() RETURNS trigger AS $$
     UPDATE public."Sustains"
     SET "isValid" = FALSE
     WHERE "Id" = ANY (SELECT s."Id" FROM public."Sustains" s JOIN public."ExamAppeals" ea ON (s."IdAppeal" = ea."Id")
-				 WHERE ea."ValutationExpireData" < CURRENT_DATE::text);
+                 WHERE ea."ValutationExpireData" < CURRENT_DATE::text);
     --CONTROLLO DI AVERE ABBASTANZA ESAMI VALIDI
-    IF(SELECT count(*) FROM public."Tests" ts LEFT JOIN (public."ExamAppeals" ea JOIN public."Sustains" s ON (ea."Id" = s."IdAppeal")) ON (ts."Id" = ea."IdTest") WHERE ts."IdExam" = NEW."IdExam" AND s."IdStudent" = NEW."IdStudent" AND s."isValid" = TRUE) =
-      (SELECT "nTest" FROM public."Exams" WHERE "Id" = NEW."IdExam" ) THEN RETURN NEW;
+    IF(SELECT count() FROM public."Tests" ts LEFT JOIN (public."ExamAppeals" ea JOIN public."Sustains" s ON (ea."Id" = s."IdAppeal")) ON (ts."Id" = ea."IdTest") WHERE ts."IdExam" = NEW."IdExam" AND s."IdStudent" = NEW."IdStudent" AND s."isValid" = TRUE AND ts."ValType" <> 'Bonus') =
+      ((SELECT "nTest" FROM public."Exams" WHERE "Id" = NEW."IdExam" ) - (SELECT count() FROM public."Tests" WHERE "IdExam" = NEW."IdExam" AND "ValType" = 'Bonus')) THEN RETURN NEW;
     END IF;
     RETURN OLD;
   END;
