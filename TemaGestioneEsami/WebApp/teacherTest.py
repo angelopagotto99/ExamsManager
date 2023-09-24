@@ -20,6 +20,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from datetime import date, datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.exc import ProgrammingError
 
 
 # Definizione dell'app Flask
@@ -69,8 +70,13 @@ def newTest():
                     IdResponsabile=current_user.id
                 )
 
-                session.add(new_test)
-                session.commit()
+
+                try:
+                    session.add(new_test)
+                    session.commit()
+                except ProgrammingError:
+                    session.rollback()
+
 
                 idTests = session.query(Tests.Id).filter(and_(
                     Tests.TestName == NameForm,
