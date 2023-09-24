@@ -71,4 +71,28 @@ EXECUTE FUNCTION controlloValiditàAppello();
 
 
 
+--- trigger per il controllo della validità degli esami
+
+CREATE OR REPLACE FUNCTION bloccoEsameBonus() RETURNS trigger AS $$
+  BEGIN
+   IF((SELECT count(*) FROM public."Tests" WHERE "IdExam" = NEW."IdExam") = (SELECT "nTest" FROM public."Exams" WHERE "Id" = NEW."IdExam") - 1)
+       AND
+     (NEW."ValType" = 'Bonus')THEN
+       RAISE data_exception USING MESSAGE = 'esame di soli bonus';
+       RETURN NULL;
+   end if;
+   RETURN NEW;
+  END;
+$$ LANGUAGE plpgsql;
+
+
+
+DROP TRIGGER IF EXISTS bloccoEsameBonus ON "Tests";
+CREATE TRIGGER bloccoEsameBonus
+BEFORE INSERT ON "Tests"
+FOR EACH ROW
+EXECUTE FUNCTION bloccoEsameBonus();
+
+
+
 
