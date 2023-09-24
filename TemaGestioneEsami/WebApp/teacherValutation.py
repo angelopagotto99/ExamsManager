@@ -62,9 +62,13 @@ def newValutationPartial():
             ).first()
             myValutations = session.query(Sustains).filter(Sustains.IdAppeal == IdAppealForm).all()
 
-            session.query(Sustains).filter(
+            try:
+                session.query(Sustains).filter(
                     and_(Sustains.IdStudent == IdStudentForm, Sustains.IdAppeal == IdAppealForm)).update(
                     {Sustains.Valutation: ValutationForm})
+            except ProgrammingError:
+                session.rollback()
+
             AllStudents = session.query(Sustains, Students).filter(
                 and_(Sustains.IdAppeal == IdAppealForm, Sustains.IdStudent == Students.Id, Teachers.Faculty == Students.Faculty)).order_by(Students.Email)
             session.commit()  # conferma le modifiche
