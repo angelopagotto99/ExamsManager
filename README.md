@@ -1,2 +1,2 @@
-# ProgettoBasiPagZemBer
-Progetto di basi di dati modulo 2 2022-23 di Angelo Pagotto, Samuele Zemello e Giovanni Berto
+# DbS - Module 2 Project
+Developed by: Angelo Pagotto and Giovanni Berto
