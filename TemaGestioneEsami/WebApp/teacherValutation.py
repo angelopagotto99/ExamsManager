@@ -129,8 +129,8 @@ def newValutationFinal():
                     myAppeal = session.query(Appeals).filter(Appeals.IdTest.in_(test_ids)).all()
                     appeal_ids = [appeal.Id for appeal in myAppeal]
 
-                    if average_valutation is not None:
-                        average_valutation = round(average_valutation+sum_bonus, 2)
+                    if average_valutation is not None and sum_bonus is None:
+                        average_valutation = round(average_valutation+0, 2)
 
                         # Controlla se tutti i voti dei test sono diversi da null
                         all_tests_graded = session.query(Sustains).filter(
@@ -148,7 +148,7 @@ def newValutationFinal():
                         # Aggiorna la tabella EnrolledStudents con le prime due cifre decimali della media calcolata
                         if all_tests_graded and is_average_valid and not exam.isIdoneo and is_valid_date:
                             if DecisionForm == "ACCETTO":
-                                student_enrollment.Valutation = average_valutation+sum_bonus
+                                student_enrollment.Valutation = average_valutation
                                 session.commit()
                             else:
                                 student_enrollment.Valutation = None
