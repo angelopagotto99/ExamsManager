@@ -1,3 +1,5 @@
+# Database Systems - Module 2 Project (2022-23) Developed by: Angelo Pagotto and Giovanni Berto
+
 # DbS - Module 2 Project
 Developed by: Angelo Pagotto and Giovanni Berto
 
